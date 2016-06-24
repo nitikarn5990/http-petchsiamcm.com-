@@ -1,0 +1,104 @@
+// Core variables and mixins
+@import "bootstrap/variables";
+@import "bootstrap/mixins";
+// Reset and dependencies
+@import "bootstrap/normalize";
+@import "bootstrap/print";
+@import "bootstrap/glyphicons";
+// Core CSS
+@import "bootstrap/scaffolding";
+@import "bootstrap/type";
+@import "bootstrap/code";
+@import "bootstrap/grid";
+@import "bootstrap/tables";
+@import "bootstrap/forms";
+@import "bootstrap/buttons";
+// Components
+@import "bootstrap/component-animations";
+@import "bootstrap/dropdowns";
+@import "bootstrap/button-groups";
+@import "bootstrap/input-groups";
+@import "bootstrap/navs";
+@import "bootstrap/navbar";
+@import "bootstrap/breadcrumbs";
+@import "bootstrap/pagination";
+@import "bootstrap/pager";
+@import "bootstrap/labels";
+@import "bootstrap/badges";
+@import "bootstrap/jumbotron";
+@import "bootstrap/thumbnails";
+@import "bootstrap/alerts";
+@import "bootstrap/progress-bars";
+@import "bootstrap/media";
+@import "bootstrap/list-group";
+@import "bootstrap/panels";
+@import "bootstrap/responsive-embed";
+@import "bootstrap/wells";
+@import "bootstrap/close";
+// Components w/ JavaScript
+@import "bootstrap/modals";
+@import "bootstrap/tooltip";
+@import "bootstrap/popovers";
+@import "bootstrap/carousel";
+// Utility classes
+@import "bootstrap/utilities";
+@import "bootstrap/responsive-utilities";
+
+@media screen and  (max-width: 768px) {
+   
+    .btn-full-width {
+        width: 100%;
+        border-radius: 25px;
+      
+    }
+     #mySearch {
+          display: none;
+    }
+    .col-md-3,
+    .col-md-4 {
+        text-align: center;
+    }
+ 
+
+}
+@media screen and (min-width: 768px) and (max-width: 992px) {
+    .btn-full-width {
+        width: 100%;
+      
+    }
+    .navbar-default .navbar-nav > li > a {
+        text-align: center;
+    }
+    #mySearch {
+          visibility: hidden; 
+    }
+    #mySearch2 > form{
+        float: right;
+    }
+
+    .col-md-3,
+    .col-md-4 {
+        text-align: center;
+    }
+  
+}
+
+@media screen and (min-width: 992px) {
+    .navbar-flag {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+    #mySearch2 {
+        display: hidden;
+    }
+}
+
+.navbar-main {
+    color: #fff;
+    background-color: #B89745;
+    border-color: #b89640;
+}
+
+.main-color {
+    color: #B89745;
+}

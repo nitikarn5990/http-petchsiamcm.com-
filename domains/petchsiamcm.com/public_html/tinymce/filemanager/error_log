@@ -1,0 +1,7 @@
+[01-May-2015 03:57:04 America/Chicago] PHP Parse error:  syntax error, unexpected '=', expecting ')' in /home2/nitikarn/public_html/tinymce/filemanager/config/config.php on line 357
+[01-May-2015 11:04:46 Europe/Rome] PHP Fatal error:  Uncaught exception 'Exception' with message 'file ../source/4.JPG is missing or invalid' in /home2/nitikarn/public_html/tinymce/filemanager/include/php_image_magician.php:346
+Stack trace:
+#0 /home2/nitikarn/public_html/tinymce/filemanager/include/utils.php(216): imageLib->resizeImage(122, 91, 'crop')
+#1 /home2/nitikarn/public_html/tinymce/filemanager/ajax_calls.php(98): create_img('../source/4.JPG', '../thumbs/4.JPG', 122, 91)
+#2 {main}
+  thrown in /home2/nitikarn/public_html/tinymce/filemanager/include/php_image_magician.php on line 346

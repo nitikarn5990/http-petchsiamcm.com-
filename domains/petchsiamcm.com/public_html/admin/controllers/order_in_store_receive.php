@@ -1,0 +1,1072 @@
+
+<?php
+
+
+
+if ($_POST['submit_bt'] == 'บันทึกข้อมูล' || $_POST['submit_bt'] == 'บันทึกข้อมูล และแก้ไขต่อ') {
+
+
+
+    if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
+
+        $redirect = true;
+    } else {
+
+        $redirect = false;
+    }
+
+    if ($_POST['order_in_store_id'] != '') {
+
+
+        //แก้ไข PO
+        //$status = $_POST['switch1'] != 'on' ? 'closed' : 'open';
+//        $arrDataPo = array(
+//            "id" => $_POST['order_in_store_id'],
+//            "created_at" => DATE_TIME,
+//            "updated_at" => DATE_TIME,
+//            "order_date" => $_POST['order_date'],
+//            "status" => $status
+//        );
+//     
+        //   $order_in_store->SetValues($arrDataPo);
+        //if ($order_in_store->Save()) {
+        //  $chk_status_po = 'open';
+        $cnt_items = count($_POST["product_id"]);
+        //แก้ไข รายละเอียดการสั่งซื้อ
+        foreach ($_POST["product_id"] as $key => $p_ids) {
+            //ต้องรับไม่เกินจำนวนที่สั่ง
+            if ($_POST["real_receive"][$key] <= $_POST["qty"][$key]) {
+                $arrDataDetail = array(
+                    "id" => $_POST["order_in_store_detail_id"][$key],
+             
+                    "real_receive" => $_POST["real_receive"][$key],
+             
+                    "updated_at" => DATE_TIME,
+                      
+                );
+
+
+                //แก้ไขการรับสินค้าหลายครั้ง
+                $real_receive2 = $order_in_store_detail->getDataDesc('real_receive2', 'id =' . $_POST["order_in_store_detail_id"][$key]);
+                if ($real_receive2 != '') {
+                    $arrDataDetail['real_receive2'] = $real_receive2 . ',' . $_POST["real_receive"][$key];
+                } else {
+                    $arrDataDetail['real_receive2'] = $_POST["real_receive"][$key];
+                }
+
+                $order_in_store_detail->updateSQL($arrDataDetail, ["id" => $_POST["order_in_store_detail_id"][$key]]);
+
+
+                $real_receive2_data = $order_in_store_detail->getDataDesc('real_receive2', 'id =' . $_POST["order_in_store_detail_id"][$key]);
+                if ($real_receive2_data != '') {
+                    $arr_rec = explode(',', $real_receive2_data);
+
+                    if (count($arr_rec) > 0) {
+                        if (count($arr_rec) == 1) {
+
+                            $products->updateSQL([ "qty" => $products->getDataDesc('qty', 'id =' . $p_ids) + $arr_rec[0]], [ "id" => $p_ids]);
+                        } else {
+                            $arr_before = key(array_slice($arr_rec, -2, 1, TRUE)); //รองสุดท้าย
+                            $arr_last = key(array_slice($arr_rec, -1, 1, TRUE)); //สุดท้าย
+
+                       
+                            //   die();
+
+
+                            $products->updateSQL([ "qty" => $products->getDataDesc('qty', 'id =' . $p_ids) - $arr_rec[$arr_before]], [ "id" => $p_ids]);
+                            $products->updateSQL([ "qty" => $products->getDataDesc('qty', 'id =' . $p_ids) + $arr_rec[$arr_last]], [ "id" => $p_ids]);
+                        }
+                    } else {
+
+
+                        //  $products->updateSQL([ "qty" => $p_qty - $arr_before], [ "id" => $p_ids]);
+
+                        $products->updateSQL([ "qty" => $products->getDataDesc('qty', 'id =' . $p_ids) + $_POST["real_receive"][$key]], [ "id" => $p_ids]);
+                    }
+                }
+
+                if ($_POST["real_receive"][$key] >= $order_in_store_detail->getDataDesc('qty', 'id =' . $_POST["order_in_store_detail_id"][$key])) {
+                    $chk_status_po = $chk_status_po + 1;
+                }
+            } else {
+                // Set alert and redirect
+                SetAlert('ต้องรับสินค้าไม่เกินกว่าที่สั่ง');
+
+                header('location:' . ADDRESS_ADMIN_CONTROL . 'order_in_store_receive&type=po&action=edit&id=' . $_GET['id']);
+
+                die();
+            }
+        }
+
+
+        //เช็คว่ารับของครับ สถานะเปลี่ยนเป็น Closed
+        if ($cnt_items == $chk_status_po) {
+            $arrDataDetail = array(
+                "status" => "closed",
+            );
+        } else {
+            $arrDataDetail = array(
+                "status" => "open",
+            );
+        }
+        $order_in_store->updateSQL($arrDataDetail, ['id' => $_POST["order_in_store_id"]]);
+        SetAlert('แก้ไขข้อมูลแล้ว', 'success');
+    } else {
+
+        //บันทึก PO
+        $arrDataPo = array(
+            "created_at" => DATE_TIME,
+            "updated_at" => DATE_TIME,
+            "order_date" => $_POST['order_date'],
+        );
+        //$functions->Insert("order_in_store", $arrDataPo);
+        $order_in_store->SetValues($arrDataPo);
+
+        if ($order_in_store->Save()) {
+            //บันทึก รายละเอียดการสั่งซื้อ
+            foreach ($_POST["product_id"] as $key => $p_ids) {
+                $arrDataDetail = array(
+                    "order_in_store_id" => $order_in_store->GetValue('id'),
+                    "product_id" => $p_ids,
+                    //     "distributor_id" => $_POST["distributor_id"][$key],
+                    "qty" => $_POST["qty"][$key],
+                    "created_at" => DATE_TIME,
+                    "updated_at" => DATE_TIME,
+                    "comment" => $_POST["comment"][$key]
+                );
+                $order_in_store_detail->SetValues($arrDataDetail);
+                $order_in_store_detail->Save();
+            }
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'order_in_store_receive&type=po');
+
+            die();
+        }
+    }
+}
+
+
+
+// If Deleting the Page
+
+if ($_GET['id'] != '' && $_GET['action'] == 'del') {
+
+
+    if ($_GET['type'] == 'po' && $_GET['del_id'] != '') {
+
+        if ($order_in_store_detail->DeleteMultiID($_GET['del_id'])) {
+
+            // Set alert and redirect
+            SetAlert('Delete Data Success', 'success');
+
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'order_in_store_receive&type=po&action=edit&id=' . $_GET['id']);
+
+            die();
+        }
+    } else {
+
+        SetAlert('ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+    }
+}
+if ($_GET['type'] == 'po' && $_GET['po_id'] != '' && $_GET['action'] == 'del') {
+
+    if ($order_in_store->DeleteMultiID($_GET['po_id'])) {
+
+        // Set alert and redirect
+        SetAlert('Delete Data Success', 'success');
+
+        header('location:' . ADDRESS_ADMIN_CONTROL . 'order_in_store_receive&type=po');
+
+
+        die();
+    }
+}
+
+
+if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
+
+    // For Update
+    $order_in_store->SetPrimary((int) $_GET['id']);
+
+    // Try to get the information
+
+    if (!$order_in_store->GetInfo()) {
+
+
+        SetAlert('ไม่สามารถค้นหาข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+
+
+        $order_in_store->ResetValues();
+    }
+}
+?>
+<?php if ($_GET['type'] == 'po') { ?>
+    <?php if ($_GET['action'] == 'edit' && $_GET['id'] != '') { ?>
+        <div class="row-fluid">
+            <div class="span12">
+                <?php
+                // Report errors to the user
+                Alert(GetAlert('error'));
+
+                Alert(GetAlert('success'), 'success');
+                ?>
+                <div class="da-panel collapsible">
+                    <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-add"></i>  ข้อมูลการสั่งซื้อสินค้าเข้าร้าน </span> </div>
+                    <div class="da-panel-content da-form-container">
+                        <form enctype="multipart/form-data" action="" method="post" class="da-form">
+                            <input type="hidden" name="submit_bt" value="บันทึกข้อมูล">
+                            <input type="hidden" name="order_in_store_id" value="<?= $order_in_store->GetValue('id') ?>">
+                            <div class="da-form-inline">
+                                <fieldset>
+                                    <legend><b>หมายเลข PO</b></legend>
+                                    <div class="da-form-row">
+
+                                        <label class="da-form-label">หมายเลข PO</label>
+                                        <div class="da-form-item large">
+                                            PO<?= $order_in_store->GetValue('id') ?>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend><b>สถานะ PO</b></legend>
+                                    <div class="da-form-row">
+                                        <label class="da-form-label">สถานะ</label>
+                                        <div class="da-form-item large">
+                                            <input type="checkbox"  id="on-off-switch" name="<?= $order_in_store->GetValue('id') ?>" <?= $order_in_store->GetValue('status') == 'open' ? 'checked' : '' ?>>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend><b>วันที่ทำการสั่งซื้อ</b></legend>
+                                    <div class="da-form-row">
+                                        <label class="da-form-label">วันที่ทำการสั่งซื้อ <span class="required">*</span></label>
+                                        <div class="da-form-item large">
+                                            <input type="text" name="order_date" id="order_date" value="<?= $order_in_store->GetValue('order_date') ?>" class="span12" data-validate="required" readonly="readonly"/>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend><b>รายละเอียดในการสั่งซื้อ</b></legend>
+
+                                    <div class="da-form-row ">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center" style="width: 2%;">รหัสสินค้า</th>
+                                                    <th class="text-center" style="width: 5%;">ชื่อสินค้า</th>
+                                                    <th class="text-center" style="width: 5%;">ตัวแทนจำหน่าย </th>
+                                                    <th class="text-center" style="width: 1%;">จำนวนปัจจุบัน </th>
+                                                    <th class="text-center" style="width: 1%;">จำนวนที่สั่ง <span style="color: red;">*</span></th>
+                                                    <th class="text-center" style="width: 1%;">จำนวนที่รับจริง <span style="color: red;">*</span></th>
+                                                    <th class="text-center hidden" style="width: 5%;">ตัวเลือก</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $sql2 = "SELECT * FROM " . $order_in_store_detail->getTbl() . " WHERE order_in_store_id = " . $_GET['id'];
+
+                                                $query2 = $db->Query($sql2);
+                                                if ($db->NumRows($query2) > 0) {
+
+                                                    while ($row2 = $db->FetchArray($query2)) {
+                                                        $distributor_id = $products->getDataDesc('distributor_id', 'id = ' . $row2['product_id']);
+                                                        $product_distributors_cost = $products->getDataDesc('product_distributors_cost', 'id = ' . $row2['product_id']);
+                                                        ?>
+                                                        <tr>
+                                                    <input type="hidden" name="order_in_store_id" value="<?= $_GET['id'] ?>">
+                                                    <input type="hidden" name="qty[]" value="<?= $row2['qty']; ?>">
+                                                    <input type="hidden" name="order_in_store_detail_id[]" value="<?= $row2['id']; ?>">
+                                                    <input type="hidden" name="product_id[]" value="<?= $row2['product_id']; ?>">
+                                                    <input type="hidden" name="cost[]" value="<?= $product_distributors_cost ?>">
+                                                    <td class="text-center display-middle"><?= $row2['product_id']; ?></td>
+                                                    <td class="text-center display-middle"><?= $products->getDataDesc('product_name', 'id = ' . $row2['product_id']); ?></td>
+                                                    <td class="text-center display-middle">
+                                                        <?= $distributor->getDataDesc('name', 'id = ' . $distributor_id); ?>
+                                                    </td>
+                                                    <td class="text-center display-middle"><?= $products->getDataDesc('qty', 'id = ' . $row2['product_id']) ?></td>
+                                                    <td class="text-center display-middle">
+                                                        <?= $row2['qty']; ?>
+                                                    </td>
+                                                    <td class="text-center display-middle">
+                                                        <input type="text" name="real_receive[]" value="<?= $row2['real_receive'] ?>" data-validate="required,number" style="text-align: center;">
+                                                    </td>
+                                                    <td class="text-center display-middle hidden">
+                                                        <a href="#" onclick="if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
+                                                                                                    document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>order_in_store_receive&type=po&id=<?php echo $row2['order_in_store_id'] ?>&action=del&del_id=<?php echo $row2['id'] ?>'
+                                                                                                          
+                                                                                                            }" class="btn btn-danger btn-small">ลบ</a>
+                                                    </td>
+                                                    </tr>
+
+                                                <?php } ?>
+                                            <?php } else { ?>
+                                                <tr>
+                                                    <td colspan="9" class="text-center display-middle">ไม่พบข้อมูล</td>
+                                                </tr>   
+                                            <?php } ?>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </fieldset>
+
+
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="submit" name="submit_bt" value="บันทึกข้อมูล" class="btn btn-success" >บันทึกข้อมูล</button>
+
+                                <a href="<?php echo ADDRESS_ADMIN_CONTROL ?>order_in_store_receive&type=po" class="btn btn-danger">ยกเลิก</a> 
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    <?php } else { ?>
+        <!-- แสดง PO ทั้งหมด-->
+        <div class="row-fluid">
+            <div class="span12">
+                <?php
+                // Report errors to the user
+
+
+                Alert(GetAlert('error'));
+
+
+                Alert(GetAlert('success'), 'success');
+                ?>
+                <form method="POST" action="">
+                    <div class="da-panel collapsible">
+                        <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-grid"></i> รายการสั่งซื้อสินค้าเข้าร้าน ทั้งหมด </span> </div>
+                        <div class="da-panel-toolbar ">
+                            <div class="btn-toolbar">
+                                <div class="btn-group"> 
+
+                                    <button type="submit" class="btn" name="submit_bt" value="เลือก"><i class="icol-add"></i> เลือก</button>
+
+                                    <a class="btn hidden" onClick="multi_delete()"><img src="http://icons.iconarchive.com/icons/awicons/vista-artistic/24/delete-icon.png" height="16" width="16"> Delete</a> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="da-panel-content da-table-container">
+                            <table id="da-ex-datatable-sort" class="da-table" sort="3" order="asc" width="1000">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="checkAll"></th>
+                                        <th>รหัส PO</th>
+                                        <th>วันที่สั่งซื้อ</th>
+                                        <th class="">สถานะ</th>
+                                        <th class="">แก้ไขล่าสุด</th>
+                                        <th class="">ตัวเลือก</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $sql = "SELECT * FROM " . $order_in_store->getTbl();
+                                    $query = $db->Query($sql);
+                                    while ($row = $db->FetchArray($query)) {
+                                        ?>
+                                        <tr>
+                                            <td class="center" width="5%"><input type="checkbox" value="<?php echo $row['id']; ?>" id="m_product_id" name="m_product_id[]"></td>
+                                            <td class="center">PO<?php echo $row['id']; ?></td>
+                                            <td class="center"><?php echo $row['order_date']; ?></td>
+                                            <td class="center f-big"> <input type="checkbox"  id="on-off-switch<?= $row['id']; ?>" name="<?= $row['id'] ?>" <?= $row['status'] == 'open' ? 'checked' : '' ?>></td>
+                                            <td class="center"><?php echo $functions->ShowDateThTime($row['updated_at']) ?></td>
+                                            <td class="center"><a href="<?php echo ADDRESS_ADMIN_CONTROL ?>order_in_store_receive&type=po&action=edit&id=<?php echo $row['id'] ?>" class="btn btn-primary btn-small">รับสินค้า</a> 
+                                            </td>
+
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    <?php } ?>
+<?php } else { ?>
+    <?php if ($_GET['action'] == "add" || $_GET['action'] == "edit") { ?>
+
+
+
+    <?php } else { ?>
+
+        <!-- ถ้ามีการเลือกสินค้าที่จะสั่งซื้อเข้าร้าน-->
+        <?php if (isset($_POST['m_product_id']) || $_POST['product_id'] != '') {
+            ?>
+
+            <div class="row-fluid">
+                <div class="span12">
+                    <?php
+                    // Report errors to the user
+
+
+                    Alert(GetAlert('error'));
+
+
+                    Alert(GetAlert('success'), 'success');
+                    ?>
+
+                    <div class="da-panel collapsible">
+                        <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-add"></i>  ข้อมูลการสั่งซื้อสินค้าเข้าร้าน </span> </div>
+                        <div class="da-panel-content da-form-container">
+                            <form enctype="multipart/form-data" action="<?= ADDRESS_ADMIN_CONTROL ?>order_in_store" method="post" class="da-form">
+                                <input type="hidden" name="submit_bt" value="บันทึกข้อมูล">
+                                <div class="da-form-inline">
+                                    <fieldset>
+                                        <legend><b>วันที่ทำการสั่งซื้อ</b></legend>
+                                        <div class="da-form-row">
+                                            <label class="da-form-label">วันที่ทำการสั่งซื้อ <span class="required">*</span></label>
+                                            <div class="da-form-item large">
+                                                <input type="text" name="order_date" id="order_date" value="" class="span12" data-validate="required" readonly="readonly"/>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend><b>รายละเอียดในการสั่งซื้อ</b></legend>
+
+                                        <div class="da-form-row ">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th class="text-center" style="width: 2%;">รหัสสินค้า</th>
+                                                        <th class="text-center" style="width: 5%;">ชื่อสินค้า</th>
+                                                        <th class="text-center" style="width: 5%;">ตัวแทนจำหน่าย</th>
+                                                        <th class="text-center" style="width: 1%;">จำนวนปัจจุบัน </th>
+                                                        <th class="text-center" style="width: 1%;">จำนวนที่สั่ง <span style="color: red;">*</span></th>
+                                                        <th class="text-center" style="width: 5%;">หมายเหตุ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
+                                                    if (isset($_POST['m_product_id'])) {
+
+                                                        foreach ($_POST['m_product_id'] as $value) {
+                                                            $p_id .= ',' . $value;
+                                                        }
+                                                        $p_id = substr($p_id, 1);
+                                                    }
+                                                    if ($_POST['product_id'] != '') {
+                                                        $p_id = $_POST['product_id'];
+                                                    }
+                                                    $sql2 = "SELECT * FROM " . $products->getTbl() . " WHERE id in(" . $p_id . ")";
+
+                                                    $query2 = $db->Query($sql2);
+                                                    if ($db->NumRows($query2) > 0) {
+
+                                                        while ($row2 = $db->FetchArray($query2)) {
+                                                            ?>
+                                                            <tr>
+                                                        <input type="hidden" name="product_id[]" value="<?= $row2['id'] ?>">
+
+                                                        <td class="text-center display-middle"><?= $row2['id'] ?></td>
+                                                        <td class="text-center display-middle"><?= $row2['product_name'] ?></td>
+                                                        <td class="text-center display-middle">
+
+                                                            <?= $distributor->getDataDesc('name', 'id = ' . $row2['distributor_id']); ?>
+                                                        </td>
+                                                        <td class="text-center display-middle"><?= $row2['qty'] ?></td>
+                                                        <td class="text-center display-middle"><input type="text" name="qty[]" class="text-center" value="" data-validate="required,number"><span style="color: red;"></span></td>
+                                                        <td class="display-middle"><textarea name="comment[]" class="span12"></textarea></td>
+                                                        </tr>
+
+                                                    <?php } ?>
+                                                <?php } ?>        
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                        <div class="da-form-row ">
+
+                                        </div>
+
+                                    </fieldset>
+
+                                </div>
+
+                                <div class="btn-row">
+                                    <button type="submit" name="submit_bt" value="บันทึกข้อมูล" class="btn btn-success" >บันทึกข้อมูล</button>
+
+                                    <a href="<?php echo ADDRESS_ADMIN_CONTROL ?>order_in_store" class="btn btn-danger">ยกเลิก</a> 
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        <?php } else { ?>
+            <!-- แสดงสินค้าทั้งหมด-->
+            <div class="row-fluid">
+                <div class="span12">
+                    <?php
+                    // Report errors to the user
+
+
+                    Alert(GetAlert('error'));
+
+
+                    Alert(GetAlert('success'), 'success');
+                    ?>
+                    <form method="POST" action="">
+                        <div class="da-panel collapsible">
+                            <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-grid"></i> เลือกสินค้าที่จะสั่งซื้อเข้าร้าน </span> </div>
+                            <div class="da-panel-toolbar ">
+                                <div class="btn-toolbar">
+                                    <div class="btn-group"> 
+
+                                        <button type="submit" class="btn" name="submit_bt" value="เลือก"><i class="icol-add"></i> เลือก</button>
+
+                                        <a class="btn hidden" onClick="multi_delete()"><img src="http://icons.iconarchive.com/icons/awicons/vista-artistic/24/delete-icon.png" height="16" width="16"> Delete</a> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="da-panel-content da-table-container">
+                                <table id="da-ex-datatable-sort" class="da-table" sort="3" order="asc" width="1000">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="checkAll"></th>
+                                            <th>รหัส</th>
+                                            <th>ชื่อสินค้า</th>
+                                            <th>กลุ่มสินค้า</th>
+                                            <th>ภาพสินค้า</th>
+                                            <th class="">จำนวนสินค้า</th>
+                                            <th class="hidden">แก้ไขล่าสุด</th>
+                                            <th class="hidden">ตัวเลือก</th>
+                                            <th class="">เลือก</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $sql = "SELECT * FROM " . $products->getTbl() . " WHERE status = 'ใช้งาน'";
+
+
+                                        $query = $db->Query($sql);
+
+
+                                        while ($row = $db->FetchArray($query)) {
+                                            ?>
+                                            <tr>
+                                                <td class="center" width="5%"><input type="checkbox" value="<?php echo $row['id']; ?>" id="m_product_id" name="m_product_id[]"></td>
+                                                <td class="center"><?php echo $row['id']; ?></td>
+                                                <td><?php echo $row['product_name']; ?></td>
+                                                <td><?php echo $category->getDataDesc("category_name", "id = '" . $row['category_id'] . "'") ?></td>
+                                                <td class="center"><img src="<?php echo ADDRESS_GALLERY . $products->getDataDesc("products_file_name_cover", "id = '" . $row['id'] . "'") ?>" style="height:70px; width:70px;"></td>
+                                                <td><?php echo $row['qty']; ?></td>
+                                                <td class="center hidden"><?php echo $functions->ShowDateThTime($row['updated_at']) ?></td>
+                                                <td class="center hidden"><a href="<?php echo ADDRESS_ADMIN_CONTROL ?>product&action=edit&id=<?php echo $row['id'] ?>" class="btn btn-primary btn-small">รับสินค้า</a> <a href="#" onclick="if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
+                                                                                            document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>product&action=del&id=<?php echo $row['id'] ?>'
+                                                                                                  
+                                                                                                    }" class="btn btn-danger btn-small">ลบ</a></td>
+                                                <td class="center"> <button type="submit" class="btn" name="product_id" value="<?php echo $row['id']; ?>"><i class="icol-add"></i> เลือก</button></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                    $("#checkAll").click(function (e) {
+                $('input:checkbox').prop('checked', this.checked);
+                });
+
+
+                    function multi_delete() {
+
+                    var msg_id = "";
+                    var res = "";
+
+                        $('input:checkbox[id^="chkboxID"]:checked').each(function () {
+
+
+                        msg_id += ',' + $(this).val();
+                    res = msg_id.substring(1);
+
+
+                    });
+                        if (res != '') {
+                            if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
+                        document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>product&action=del&id=' + res;
+                    }
+                }
+
+                }
+
+            </script>
+        <?php } ?>
+    <?php } ?>
+<?php } ?>       
+<script type="text/javascript">
+    //$( document ).ready(function() {
+
+
+        function addfile() {
+
+
+    $("#filecopy:first").clone().insertAfter("div #filecopy:last");
+
+
+    }
+
+
+        function delfile() {
+
+
+        //$("#filecopy").clone().insertAfter("div #filecopy:last");
+
+
+        var conveniancecount = $("div #filecopy").length;
+
+
+            if (conveniancecount > 2) {
+
+
+        $("div #filecopy:last").remove();
+
+
+    }
+    }
+
+
+        $(document).ready(function () {
+
+            $('input:radio[name="products_file_name_cover"][value="<?php echo $products->getDataDesc("products_file_name_cover", "id = '" . $_GET['id'] . "'"); ?>"]').prop('checked', true);
+
+    });
+
+</script> 
+<script>
+        $(function () {
+
+
+        // $( "#datepicker" ).datepicker();
+
+
+    $("#activity_date").datepicker({dateFormat: "yy-mm-dd"}).val()
+
+
+    });
+
+
+</script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+
+
+<script>
+        $(function () {
+            $('#order_date').datepicker({
+            minDate: '0',
+        dateFormat: "yy-mm-dd",
+    });
+    });
+        function cleartext(ele) {
+    $(ele).val('');
+    }
+</script>
+<style>
+    /*Colored Label Attributes*/
+    .error{
+        display: block;
+        color: #d44d24;
+        font-size: 11px;
+        margin-top: 1px;
+    }
+    .display-middle{
+        display: table-cell;
+        vertical-align: middle !important;
+    }
+    textarea{
+        height: 6em;
+    }
+    .text-center{
+        text-align: center !important;
+    }
+    .ui-datepicker{
+        z-index: 9999 !important;
+    }
+    .hidden{
+        display: none;
+    }
+    .label {
+        background-color: #BFBFBF;
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        color: #FFFFFF;
+        font-size: 9.75px;
+        font-weight: bold;
+        padding-bottom: 2px;
+        padding-left: 4px;
+        padding-right: 4px;
+        padding-top: 2px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .label:hover {
+        opacity: 80;
+    }
+    .label.success {
+        background-color: #46A546;
+    }
+    .label.success2 {
+        background-color: #CCC;
+    }
+    .label.success3 {
+        background-color: #61a4e4;
+    }
+    .label.warning {
+        background-color: #FC9207;
+    }
+    .label.failure {
+        background-color: #D32B26;
+    }
+    .label.alert {
+        background-color: #33BFF7;
+    }
+    .label.good-job {
+        background-color: #9C41C6;
+    }
+
+    table {
+        max-width: 100%;
+        background-color: transparent;
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px;
+        line-height: 20px;
+        text-align: left;
+        vertical-align: top;
+        border-top: 1px solid #dddddd;
+    }
+
+    .table th {
+        font-weight: bold;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+    }
+
+    .table caption + thead tr:first-child th,
+    .table caption + thead tr:first-child td,
+    .table colgroup + thead tr:first-child th,
+    .table colgroup + thead tr:first-child td,
+    .table thead:first-child tr:first-child th,
+    .table thead:first-child tr:first-child td {
+        border-top: 0;
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid #dddddd;
+    }
+
+    .table-condensed th,
+    .table-condensed td {
+        padding: 4px 5px;
+    }
+
+    .table-bordered {
+        border: 1px solid #dddddd;
+        border-collapse: separate;
+        *border-collapse: collapse;
+        border-left: 0;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border-left: 1px solid #dddddd;
+    }
+
+    .table-bordered caption + thead tr:first-child th,
+    .table-bordered caption + tbody tr:first-child th,
+    .table-bordered caption + tbody tr:first-child td,
+    .table-bordered colgroup + thead tr:first-child th,
+    .table-bordered colgroup + tbody tr:first-child th,
+    .table-bordered colgroup + tbody tr:first-child td,
+    .table-bordered thead:first-child tr:first-child th,
+    .table-bordered tbody:first-child tr:first-child th,
+    .table-bordered tbody:first-child tr:first-child td {
+        border-top: 0;
+    }
+
+    .table-bordered thead:first-child tr:first-child th:first-child,
+    .table-bordered tbody:first-child tr:first-child td:first-child {
+        -webkit-border-top-left-radius: 4px;
+        border-top-left-radius: 4px;
+        -moz-border-radius-topleft: 4px;
+    }
+
+    .table-bordered thead:first-child tr:first-child th:last-child,
+    .table-bordered tbody:first-child tr:first-child td:last-child {
+        -webkit-border-top-right-radius: 4px;
+        border-top-right-radius: 4px;
+        -moz-border-radius-topright: 4px;
+    }
+
+    .table-bordered thead:last-child tr:last-child th:first-child,
+    .table-bordered tbody:last-child tr:last-child td:first-child,
+    .table-bordered tfoot:last-child tr:last-child td:first-child {
+        -webkit-border-radius: 0 0 0 4px;
+        -moz-border-radius: 0 0 0 4px;
+        border-radius: 0 0 0 4px;
+        -webkit-border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        -moz-border-radius-bottomleft: 4px;
+    }
+
+    .table-bordered thead:last-child tr:last-child th:last-child,
+    .table-bordered tbody:last-child tr:last-child td:last-child,
+    .table-bordered tfoot:last-child tr:last-child td:last-child {
+        -webkit-border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        -moz-border-radius-bottomright: 4px;
+    }
+
+    .table-bordered caption + thead tr:first-child th:first-child,
+    .table-bordered caption + tbody tr:first-child td:first-child,
+    .table-bordered colgroup + thead tr:first-child th:first-child,
+    .table-bordered colgroup + tbody tr:first-child td:first-child {
+        -webkit-border-top-left-radius: 4px;
+        border-top-left-radius: 4px;
+        -moz-border-radius-topleft: 4px;
+    }
+
+    .table-bordered caption + thead tr:first-child th:last-child,
+    .table-bordered caption + tbody tr:first-child td:last-child,
+    .table-bordered colgroup + thead tr:first-child th:last-child,
+    .table-bordered colgroup + tbody tr:first-child td:last-child {
+        -webkit-border-top-right-radius: 4px;
+        border-top-right-radius: 4px;
+        -moz-border-radius-topright: 4px;
+    }
+
+    .table-striped tbody tr:nth-child(odd) td,
+    .table-striped tbody tr:nth-child(odd) th {
+        background-color: #f9f9f9;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: #f5f5f5;
+    }
+
+    table td[class*="span"],
+    table th[class*="span"],
+    .row-fluid table td[class*="span"],
+    .row-fluid table th[class*="span"] {
+        display: table-cell;
+        float: none;
+        margin-left: 0;
+    }
+
+    .table td.span1,
+    .table th.span1 {
+        float: none;
+        width: 44px;
+        margin-left: 0;
+    }
+
+    .table td.span2,
+    .table th.span2 {
+        float: none;
+        width: 124px;
+        margin-left: 0;
+    }
+
+    .table td.span3,
+    .table th.span3 {
+        float: none;
+        width: 204px;
+        margin-left: 0;
+    }
+
+    .table td.span4,
+    .table th.span4 {
+        float: none;
+        width: 284px;
+        margin-left: 0;
+    }
+
+    .table td.span5,
+    .table th.span5 {
+        float: none;
+        width: 364px;
+        margin-left: 0;
+    }
+
+    .table td.span6,
+    .table th.span6 {
+        float: none;
+        width: 444px;
+        margin-left: 0;
+    }
+
+    .table td.span7,
+    .table th.span7 {
+        float: none;
+        width: 524px;
+        margin-left: 0;
+    }
+
+    .table td.span8,
+    .table th.span8 {
+        float: none;
+        width: 604px;
+        margin-left: 0;
+    }
+
+    .table td.span9,
+    .table th.span9 {
+        float: none;
+        width: 684px;
+        margin-left: 0;
+    }
+
+    .table td.span10,
+    .table th.span10 {
+        float: none;
+        width: 764px;
+        margin-left: 0;
+    }
+
+    .table td.span11,
+    .table th.span11 {
+        float: none;
+        width: 844px;
+        margin-left: 0;
+    }
+
+    .table td.span12,
+    .table th.span12 {
+        float: none;
+        width: 924px;
+        margin-left: 0;
+    }
+
+    .table tbody tr.success td {
+        background-color: #dff0d8;
+    }
+
+    .table tbody tr.error td {
+        background-color: #f2dede;
+    }
+
+    .table tbody tr.warning td {
+        background-color: #fcf8e3;
+    }
+
+    .table tbody tr.info td {
+        background-color: #d9edf7;
+    }
+
+    .table-hover tbody tr.success:hover td {
+        background-color: #d0e9c6;
+    }
+
+    .table-hover tbody tr.error:hover td {
+        background-color: #ebcccc;
+    }
+
+    .table-hover tbody tr.warning:hover td {
+        background-color: #faf2cc;
+    }
+
+    .table-hover tbody tr.info:hover td {
+        background-color: #c4e3f3;
+    }
+    .f-big:first-letter {font-size: 16px;}
+
+
+</style>
+<script>
+        new DG.OnOffSwitch({
+        el: '#on-off-switch',
+        textOn: 'Open',
+        textOff: 'Closed',
+            listener: function (name, checked) {
+            // document.getElementById("listener-text-table").innerHTML = "Switch " + name + " changed value to " + checked;
+
+                $.ajax({
+                type: "GET",
+                url: "ajax_set_status_po.php",
+                cache: false,
+                data: "status=" + checked + "&id=" + name,
+                    success: function (msg) {
+                        if (msg === 'success') {
+                    notie.alert(1, 'Success!', 1.5);
+                        } else {
+                    notie.alert(3, 'Error.', 2.5);
+                }
+
+            }
+        });
+
+
+    }
+    });
+
+</script>
+<script>
+<?php
+$sql = "SELECT * FROM " . $order_in_store->getTbl();
+$query = $db->Query($sql);
+if ($db->NumRows($query) > 0) {
+    while ($row = $db->FetchArray($query)) {
+        ?>
+
+                new DG.OnOffSwitch({
+                        el: '#on-off-switch<?= $row['id'] ?>',
+                                textOn: 'Open',
+                                textOff: 'Closed',
+                                    listener: function (name, checked) {
+                                    // document.getElementById("listener-text-table").innerHTML = "Switch " + name + " changed value to " + checked;
+
+                                        $.ajax({
+                                        type: "GET",
+                                        url: "ajax_set_status_po.php",
+                                        cache: false,
+                                        data: "status=" + checked + "&id=" + name,
+                                            success: function (msg) {
+                                                if (msg === 'success') {
+                                            notie.alert(1, 'Success!', 1.5);
+                                                } else {
+                                            notie.alert(3, 'Error.', 2.5);
+                                        }
+
+                                    }
+                                });
+
+
+                            }
+                    });
+
+    <?php } ?>
+<?php } ?>
+</script>

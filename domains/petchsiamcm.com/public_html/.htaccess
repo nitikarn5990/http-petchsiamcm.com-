@@ -1,0 +1,24 @@
+
+RewriteEngine On
+
+#RewriteBase /
+
+#RewriteRule ^(css|images|img|js|fonts) - [L]
+
+
+
+RewriteRule ^([ก-ฮa-zA-Z0-9เ\_-]+)$ index.php?controllers=$1 [L]
+
+RewriteRule ^([ก-ฮa-zA-Z0-9เ\_-]+)/([ก-ฮa-zA-Z0-9เ\_-]+)$ index.php?controllers=$1&catID=$2 [L]
+
+RewriteRule ^([ก-ฮa-zA-Z0-9เ\_-]+)/([ก-ฮa-zA-Z0-9เ\_-]+)/([ก-ฮa-zA-Z0-9เ\_-]+)$ index.php?controllers=$1&catID=$2&productID=$3 [L]
+
+
+
+
+
+ 
+
+ 
+
+ 
