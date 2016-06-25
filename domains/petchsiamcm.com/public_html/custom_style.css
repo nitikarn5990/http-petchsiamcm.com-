@@ -1,0 +1,92 @@
+.my-btn-cart {
+    font-family:Thai Sans Lite;
+    -moz-box-shadow:inset 0px 1px 0px 0px #9acc85;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #9acc85;
+    box-shadow:inset 0px 1px 0px 0px #9acc85;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #74ad5a), color-stop(1, #68a54b));
+    background:-moz-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-webkit-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-o-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-ms-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:linear-gradient(to bottom, #74ad5a 5%, #68a54b 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#74ad5a', endColorstr='#68a54b',GradientType=0);
+    background-color:#74ad5a;
+    border:1px solid #3b6e22;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff !important;
+    font-size:21px;
+    padding: 3px 0 8px 0;
+    text-decoration:none;
+    width: 100%;
+    text-align: center;
+    color: #FFF !important;
+}
+.my-btn-cart:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #68a54b), color-stop(1, #74ad5a));
+    background:-moz-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-webkit-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-o-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-ms-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:linear-gradient(to bottom, #68a54b 5%, #74ad5a 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#68a54b', endColorstr='#74ad5a',GradientType=0);
+    background-color:#68a54b;
+}
+.my-btn-cart:active {
+    position:relative;
+    top:1px;
+}
+
+body .u-cart {
+    position: fixed;
+}
+.u-cart {
+    width: 160px;
+}
+.u-cart {
+    position: absolute;
+    right: 0; 
+    top: 49px;
+    width: 160px;
+    z-index: 123;
+}
+.u-cart .unitShirt {
+    position: relative;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-image: url(images/bg_cart.png);
+    width: 160px;
+    height: 82px;
+}
+.u-cart .product {
+    width: 140px;
+    text-align: center;
+    padding-top: 26px;
+    line-height: 21px;
+}
+.u-cart a{
+    font-family:Thai Sans Lite;
+    color: #073705;
+    font-size: 20px;
+}
+#contentproducts li a:hover{
+    opacity: 0.8;
+}
+.myfont{
+    font-family:Thai Sans Lite;
+}
+.font-22{
+    font-size: 22px;
+}
+.text-bold{
+    font-weight: bold;
+}
+
+.my-panel{
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    border-left-color: #1b809e;
+}

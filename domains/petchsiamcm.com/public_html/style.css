@@ -37,13 +37,13 @@ a:hover{color:#f3bb3e; text-decoration: underline;}
 #slide{ clear: both; margin:0 0 0 0; padding:0; width:100%; position:relative; z-index:0;}
 .txtslide{ width:1024px; position:absolute; z-index:5; padding:350px 0 0 768px; text-align:center; margin: 0 auto 0 auto;}
 .imgslideproducts{ height:126px; background: url(images/img-products.jpg) no-repeat center center;
-        -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover;}
+                   -webkit-background-size: cover;
+                   -moz-background-size: cover;
+                   -o-background-size: cover;
+                   background-size: cover;}
 .txtslideproducts{width:1024px; position:absolute; z-index:5; padding:10px 0 0 520px; text-align:center; margin: 0 auto 0 auto;}
 #content{ clear:both; width:1024px; margin:500px auto 0 auto; padding:0;}
-#contentproducts{ clear:both; width:1024px; margin:0 auto;}
+#contentproducts{ clear:both;  margin:0 auto;}
 #contentproducts ul{list-style:none; padding:0 0 0 20px; margin:0 auto; text-align:center; width:1024px;}
 #contentproducts li{display:block; float:left; padding:5px 15px; margin:0;}
 #contentproducts li a{ color:#000; text-decoration:none;}
@@ -54,32 +54,73 @@ a:hover{color:#f3bb3e; text-decoration: underline;}
 .item-cost{
     color: #fb0709;
 }
+
 .add_cart_button {
-    
     display: block;
-   padding: 5px 8px 5px 5px;
+    padding: 5px 8px 5px 5px;
     color: #FFFFFF !important;
     margin-left: 39px;
     background-color: #073705;
-    border-radius: 10px;
-   
+    border-radius: 5px;
     border: 1px solid #073705;
     text-shadow: 0px 1px rgba(109, 108, 108, 0.46);
     margin: auto;
+    font-family: Thai Sans Lite;
+    font-size: 20px;
+    padding-bottom: 8px;
 }
 .add_cart_button:active {
-    
-    background-color: #3a6d29;
-  
+    opacity: 0.8;
+    position:relative;
+    top:1px;
 }
-.form-payments{
+.add_cart_button:hover {
+
+    position:relative;
+    top:-3px;
+}
+
+//ปุ่ม Add to cart
+.my-btn-cart {
+    font-family:Thai Sans Lite;
+    -moz-box-shadow:inset 0px 1px 0px 0px #9acc85;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #9acc85;
+    box-shadow:inset 0px 1px 0px 0px #9acc85;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #74ad5a), color-stop(1, #68a54b));
+    background:-moz-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-webkit-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-o-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:-ms-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+    background:linear-gradient(to bottom, #74ad5a 5%, #68a54b 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#74ad5a', endColorstr='#68a54b',GradientType=0);
+    background-color:#74ad5a;
+    border:1px solid #3b6e22;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff !important;
+    font-size:21px;
+    padding: 3px 0 8px 0;
+    text-decoration:none;
+    width: 100%;
     text-align: center;
-    webkit-box-shadow: 2px 6px 5px 0px rgba(0, 0, 0, 0.08);
-    -moz-box-shadow: 2px 6px 5px 0px rgba(0, 0, 0, 0.08);
-    box-shadow: 2px 6px 5px 0px rgba(0, 0, 0, 0.08);
-    margin: auto;
-    border-radius: 10px;
-    background-color: rgb(248, 255, 230);
-    padding: 38px;
-    width: 386px;
+    color: #FFF !important;
 }
+.my-btn-cart:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #68a54b), color-stop(1, #74ad5a));
+    background:-moz-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-webkit-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-o-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:-ms-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+    background:linear-gradient(to bottom, #68a54b 5%, #74ad5a 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#68a54b', endColorstr='#74ad5a',GradientType=0);
+    background-color:#68a54b;
+}
+.my-btn-cart:active {
+    position:relative;
+    top:1px;
+}
+
+em{
+    color: red;
+}
+
