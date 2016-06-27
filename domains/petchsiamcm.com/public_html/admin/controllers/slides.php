@@ -220,7 +220,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                             <li> 
                                                 <span class="">
                                                     <?php if ($slides->GetPrimary() != '') { ?>
-                                                        <img src="<?php echo ADDRESS_SLIDES . $slides_file->getDataDescLastID("file_name", "slides_id = " . $slides->GetPrimary()) ?>" alt="<?php echo $slides_file->GetValue('alt_tag') ?>" style="max-width: 100%;" class="img-thumbnail"> 
+                                                        <img src="<?php echo ADDRESS_SLIDES .  $slides->GetValue('image') ?>" alt="" style="max-width: 100%;" class="img-thumbnail"> 
                                                     <?php } ?>
                                                 </span> 
                                             </li>

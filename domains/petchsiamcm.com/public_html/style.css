@@ -37,12 +37,12 @@ a:hover{color:#f3bb3e; text-decoration: underline;}
 #slide{ clear: both; margin:0 0 0 0; padding:0; width:100%; position:relative; z-index:0;}
 .txtslide{ width:1024px; position:absolute; z-index:5; padding:350px 0 0 768px; text-align:center; margin: 0 auto 0 auto;}
 .imgslideproducts{ height:126px; background: url(images/img-products.jpg) no-repeat center center;
-                   -webkit-background-size: cover;
+                   -webkit-background-size: cover; 
                    -moz-background-size: cover;
                    -o-background-size: cover;
                    background-size: cover;}
 .txtslideproducts{width:1024px; position:absolute; z-index:5; padding:10px 0 0 520px; text-align:center; margin: 0 auto 0 auto;}
-#content{ clear:both; width:1024px; margin:500px auto 0 auto; padding:0;}
+#content{ clear:both; width:1024px; margin: auto; padding:0;} 
 #contentproducts{ clear:both;  margin:0 auto;}
 #contentproducts ul{list-style:none; padding:0 0 0 20px; margin:0 auto; text-align:center; width:1024px;}
 #contentproducts li{display:block; float:left; padding:5px 15px; margin:0;}

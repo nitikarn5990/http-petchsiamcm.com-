@@ -16,7 +16,7 @@ if (count($_SESSION["strProductID"]) == 0) {
     </header>
     <br>
 
-    <form action="<?php echo ADDRESS ?>cart" method="post">
+    <form action="<?php echo ADDRESS ?>shipping" method="post" onsubmit="return div_loading()">
         <div class="table-responsive">
             <table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">
                 <tbody>
@@ -28,14 +28,11 @@ if (count($_SESSION["strProductID"]) == 0) {
                         <th class="text-center" style="width: 100px;">จำนวน</th>
                         <th class="text-center">ราคารวม</th>
 
-
-
                     </tr>
                     <?php
                     $k = 0;
                     $total_qty = 0;
                     for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
-
 
                         if ($_SESSION["strProductID"][$i] != "") {
 
@@ -105,7 +102,9 @@ if (count($_SESSION["strProductID"]) == 0) {
             <div id="cart-button" style="position: relative;float: right;width: 285px;">
                 <div class="" style="border-color:#DDDDDD;">
                     <div class="panel-body" style="text-align: right;  padding-top: 50px;">
-                        <a href="<?= ADDRESS ?>shipping"  class="btn btn-success" ><i class="fa fa-arrow-right" style="font-size: 16px;"></i> ยืนยันการสั่งซื้อ</a> </div>
+                       
+                        <button type="submit" name="btn_verify" class="btn btn-success" value="ยืนยันการสั่งซื้อ"><i class="fa fa-arrow-right" style="font-size: 16px;"></i> ยืนยันการสั่งซื้อ</button>
+                    </div>
 
                 </div>
             </div>
@@ -113,4 +112,11 @@ if (count($_SESSION["strProductID"]) == 0) {
         </div>
     </form>
 </div>
+<script>
+    function div_loading(){
+         $.blockUI({message: '<h3> Loading...</h3>'});
+         return true;
+    }
+    
+</script>
 

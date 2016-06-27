@@ -197,7 +197,7 @@
                 
               ajax_add_to_cart(product_id);
               
-            }, 1500);
+            }, 1000);
 
             imgclone.animate({
                 'width': 0,

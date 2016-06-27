@@ -84,7 +84,6 @@ if ($res != 'error' && $res_user_refer != 'error') {
         $customer->SetValue('register_date', DATE_TIME);
     } else {
 
-
         $customer->SetValue('updated_at', DATE_TIME);
     }
 

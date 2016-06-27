@@ -23,12 +23,11 @@ include_once($_SERVER["DOCUMENT_ROOT"] . '/lib/application.php');
                     <meta name="viewport" content="width=device-width">
                         <link rel="stylesheet" href="<?= ADDRESS ?>slide.css">
                             <link rel="stylesheet" href="<?= ADDRESS ?>dist/slippry.css">
+                             <script src='https://www.google.com/recaptcha/api.js?hl=th'></script> 
                                 </head>
                                 <body>
                                     <div id="top">
                                         <div id="login-social">
-
-
                                             <?php if ($_SESSION['group'] == 'member') { ?>
                                                 <div class="top-left" style="margin: 0px; padding: 9px 0 0 0;width: 797px;">
                                                     <section id="box-logged">
@@ -60,8 +59,6 @@ include_once($_SERVER["DOCUMENT_ROOT"] . '/lib/application.php');
                                                     </section>
                                                 </div>
                                             <?php } ?>
-
-
                                             <div class="top-right"> 
                                                 <a href="https://<?= $social->getDataDesc("facebook", "id = 1"); ?>" target="_blank"><img src="<?= ADDRESS ?>images/icon-facebook.jpg" /> </a>
                                                 <a href="https://<?= $social->getDataDesc("twitter", "id = 1"); ?>" target="_blank"><img src="<?= ADDRESS ?>images/icon-twitter.jpg" /></a>
@@ -141,9 +138,7 @@ include_once($_SERVER["DOCUMENT_ROOT"] . '/lib/application.php');
                                         </div>
                                     </div>
                                     <div class="clear"></div>
-
                                     <div id="content">
-
                                         <?php
                                         if (PAGE_CONTROLLERS == '' || PAGE_CONTROLLERS == 'index') {
                                             include 'controllers/home.php';

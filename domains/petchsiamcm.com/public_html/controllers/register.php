@@ -1,34 +1,66 @@
 <?php
 if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
-    if ($customer->CountDataDesc("id", "login_email = '" . $_POST['login_email'] . "'") > 0) {
-        ?>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                alert('มีผู้ใช้นี้แล้ว ลองใหม่อีกครั้ง');
-            });
-        </script>
+
+//    $recaptcha_secret = "6LeMxSITAAAAAEPNFj9C3VJifv8yAUH3HDLkgRuW";
+//    $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . $recaptcha_secret . "&response=" . $_POST['g-recaptcha-response']);
+//    $response = json_decode($response, true);
+
+    $captcha = "";
+    if (isset($_POST["g-recaptcha-response"]))
+        $captcha = $_POST["g-recaptcha-response"];
+
+    if (!$captcha)
+    // echo "not ok";
+    // handling the captcha and checking if it's ok
+        $secret = "6LeMxSITAAAAAHn6FCGQNv47qSaAS3HGl7_tK0eV";
+    $response = json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . $secret . "&response=" . $captcha . "&remoteip=" . $_SERVER["REMOTE_ADDR"]), true);
+
+    // if the captcha is cleared with google, send the mail and echo ok.
+//    if ($response["success"] != false) {
+//        // send the actual mail
+//        @mail($email_to, $subject, $finalMsg);
+//
+//        // the echo goes back to the ajax, so the user can know if everything is ok
+//        echo "ok";
+//    } else {
+//        echo "not ok";
+//    }
+
+    if ($response["success"] === true) {
+
+        if ($customer->CountDataDesc("id", "login_email = '" . $_POST['login_email'] . "'") > 0) {
+            ?>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    alert('มีผู้ใช้นี้แล้ว ลองใหม่อีกครั้ง');
+                });
+            </script>
 
 
-        <?php
-    } else {
-        $redirect = false;
-        $arrData = array();
-        $arrData = $functions->replaceQuote($_POST);
-        $customer->SetValues($arrData);
-        $customer->SetValue('status', 'ใช้งาน');
-        $customer->SetValue('login_password', $functions->encode_login($_POST['login_password_encryt']));
-        if ($customer->GetPrimary() == '') {
-            $customer->SetValue('created_at', DATE_TIME);
-            $customer->SetValue('updated_at', DATE_TIME);
-            $customer->SetValue('register_date', DATE_TIME);
+            <?php
         } else {
-            $customer->SetValue('updated_at', DATE_TIME);
+            $redirect = false;
+            $arrData = array();
+            $arrData = $functions->replaceQuote($_POST);
+            $customer->SetValues($arrData);
+            $customer->SetValue('status', 'ใช้งาน');
+            $customer->SetValue('login_password', $functions->encode_login($_POST['login_password_encryt']));
+            if ($customer->GetPrimary() == '') {
+                $customer->SetValue('created_at', DATE_TIME);
+                $customer->SetValue('updated_at', DATE_TIME);
+                $customer->SetValue('register_date', DATE_TIME);
+            } else {
+                $customer->SetValue('updated_at', DATE_TIME);
+            }
+            if ($customer->Save()) {
+                echo "<script>alert('สมัครสมาชิกเรียบร้อยแล้ว')</script>";
+                header('location:' . ADDRESS . 'register/success.html');
+                die();
+            }
         }
-        if ($customer->Save()) {
-            echo "<script>alert('สมัครสมาชิกเรียบร้อยแล้ว')</script>";
-            header('location:' . ADDRESS . 'register/success.html');
-            die();
-        }
+    } else {
+        echo 'error';
+        die();
     }
 }
 ?>
@@ -212,6 +244,8 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                     </div>
                 </div>
             </section>
+            <input type="hidden" class="hiddenRecaptcha required" name="hiddenRecaptcha" id="hiddenRecaptcha">
+            <div class="g-recaptcha" data-sitekey="6LeMxSITAAAAAHn6FCGQNv47qSaAS3HGl7_tK0eV"></div>
 
 
             <p>&nbsp;</p>
@@ -226,20 +260,21 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
     </div>
 </div>
 <div id="op"></div>
+<div id="bb22"></div>
 
 <script>
- 
+
 // pre-submit callback 
     function showRequest(formData, jqForm, options) {
- 
+
         $.blockUI({message: '<h3> Loading...</h3>'});
         var queryString = $.param(formData);
-     
+
         return true;
     }
 // post-submit callback 
     function showResponse(responseText, statusText, xhr, $form) {
-     
+
         if (responseText.username == 'error' || responseText.user_refer == 'error') {
             //  alert('username นี้มีผู้ใช้แล้ว');
             if (responseText.username == 'error') {
@@ -250,16 +285,19 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                     timeout: 3000,
                 });
                 $('#username').focus();
+                //  ScriptManager.RegisterStartupScript(this, this.GetType(), "CaptchaReload", "$.getScript(\"https://www.google.com/recaptcha/api.js\", function () {});", true);
             }
             if (responseText.user_refer == 'error') {
                 noty({
-                    text: 'ไม่พบข้อมูล รหัสผู้แนะนำ',
+                    text: 'ไม่พบข้อมูล รหัสผู้แนะนำ ถ้าไม่มีให้เป็นค่าว่าง',
                     type: 'warning',
                     theme: 'relax', // or 'relax'
-                    timeout: 3000,
+                    timeout: 5000,
                 });
                 $('#txt_user_refer').focus();
+                //  ScriptManager.RegisterStartupScript(this, this.GetType(), "CaptchaReload", "$.getScript(\"https://www.google.com/recaptcha/api.js\", function () {});", true);
             }
+
         } else {
             noty({
                 text: 'สมัครสมาชิกสำเร็จ',
@@ -269,13 +307,17 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
             });
             $('#myForm2')[0].reset();
         }
+        grecaptcha.reset();
+
         $.unblockUI();
     }
+    
     var status = '';
     function check_username_duplicate() {
         var txt_username = $('#username').val();
         //alert(txt_username);
         if (txt_username != '') {
+            
             $.ajax({
                 type: 'POST',
                 url: '<?= ADDRESS ?>ajax/ajax_check_username_duplicate.php',
@@ -284,21 +326,21 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                     username: txt_username
                 },
                 success: function (data) {
-                 
+
                     if (data === 'success') {
-              
                         status = 'success';
-              
                     } else {
                         status = 'error';
-      
                     }
                 }
             });
         }
     }
+    
     $('#check_user_refer').click(function () {
+    
         var txt_user_refer_id = $('#txt_user_refer').val();
+        
         if (txt_user_refer_id != '') {
             //หาชื่อจริง จาก id ผู้แนะนำ
             $.ajax({
@@ -333,6 +375,7 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
         }
     });
 </script>
+
 <link href="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.23/theme-default.min.css"
       rel="stylesheet" type="text/css" />
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.43/jquery.form-validator.min.js"></script>
@@ -369,7 +412,36 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
             $('input[name="pass"]').displayPasswordStrength(optionalConfig);
         },
         onSuccess: function ($form) {
-            $('#myForm2').ajaxSubmit(options);
+
+//console.log($('#g-recaptcha-response').val());
+//          
+//if ($('#g-recaptcha-response').val() != '') {
+
+            $.ajax({
+                type: 'POST',
+                url: '<?= ADDRESS ?>ajax/ajax_check_captcha.php',
+                dataType: 'json',
+                data: {
+                    recaptcha: $('#g-recaptcha-response').val()
+                },
+                success: function (data) {
+                    if (data.captcha == 'error') {
+                        noty({
+                            text: 'Captcha Error',
+                            type: 'warning',
+                            theme: 'relax', // or 'relax'
+                            timeout: 3000,
+                        });
+                    } else {
+                        $('#myForm2').ajaxSubmit(options);
+                    }
+
+                    // console.log(data.captcha);
+                    // $('#myForm2').ajaxSubmit(options);
+                }
+            });
+            // }
+            //  $('#myForm2').ajaxSubmit(options);
             return false; // Will stop the submission of the form
         },
     });

@@ -34,9 +34,13 @@ if ($_POST ["submit_bt"] == 'Submit') {
         // $contact_message->Save();
 
         if ($contact_message->Save()) {
-             echo "<script>  $(document).ready(function(){   noty({  text: 'ส่งข้อความสำเร็จ', type: 'success',
-                    theme: 'relax',
-                    timeout: 3000, }); });</script>";
+//            echo "<script>  $(document).ready(function(){   noty({  text: 'ส่งข้อความสำเร็จ', type: 'success',
+//                    theme: 'relax',
+//                    timeout: 3000, }); });</script>";
+
+            SetAlert('ส่งข้อความสำเร็จ', 'success');
+            header('location:' . ADDRESS . 'contact');
+            die();
         } else {
             echo "<script>  $(document).ready(function(){   noty({  text: 'Error Code', type: 'warning',
                     theme: 'relax',
@@ -51,9 +55,23 @@ if ($_POST ["submit_bt"] == 'Submit') {
 ?>
 
 
-<div class="row">
+<div class="col-md-12 well">
+     <div class="col-md-12">
+      
+            <?php
+            // Report errors to the user
+
+
+            Alert(GetAlert('error'));
+
+
+            Alert(GetAlert('success'), 'success');
+            ?>
+      
+        
+    </div>
     <div class="col-md-12">
-        <form class="form-horizontal form-paymentss well " enctype="multipart/form-data"  method="POST" action="<?php echo ADDRESS ?>contact">
+        <form class="form-horizontal form-paymentss  " enctype="multipart/form-data"  method="POST" action="<?php echo ADDRESS ?>contact">
             <section class="">
                 <h1 style="margin-top: 0;"><?= $contact->getDataDesc('contact_title', 'id = 1') ?></h1>
                 <?= $contact->getDataDesc('contact_detail', 'id = 1') ?>
@@ -66,7 +84,7 @@ if ($_POST ["submit_bt"] == 'Submit') {
 
                         <label for="inputHelpBlock">ชื่อ <em>*</em></label>
                         <span>
-                            <input type="text" class="form-control" name="txt_name"  data-validation="required">
+                            <input type="text" class="form-control" name="txt_name" value="<?= isset($_POST['txt_name']) ? $_POST['txt_name'] : '' ?>" data-validation="required">
                         </span> 
                     </div>
                 </div>
@@ -76,7 +94,7 @@ if ($_POST ["submit_bt"] == 'Submit') {
 
                         <label for="inputHelpBlock">เบอร์โทร <em>*</em></label>
                         <span>
-                            <input type="text" class="form-control" name="txt_tel"  data-validation="number,required">
+                            <input type="text" class="form-control" name="txt_tel" value="<?= isset($_POST['txt_tel']) ? $_POST['txt_tel'] : '' ?>"  data-validation="number,required">
                         </span> 
                     </div>
                 </div>
@@ -85,7 +103,7 @@ if ($_POST ["submit_bt"] == 'Submit') {
 
                         <label for="inputHelpBlock">Email <em>*</em></label>
                         <span>
-                            <input type="text" name="txt_email" class="form-control" id="email"  data-validation="required,email">
+                            <input type="text" name="txt_email" class="form-control" id="email" value="<?= isset($_POST['txt_email']) ? $_POST['txt_email'] : '' ?>"  data-validation="required,email">
                         </span> 
                     </div>
                 </div>
@@ -95,7 +113,7 @@ if ($_POST ["submit_bt"] == 'Submit') {
 
                         <label for="inputHelpBlock">หัวข้อ <em>*</em></label>
                         <span> 
-                            <input type="text" class="form-control" name="txt_subject"  data-validation="required">
+                            <input type="text" class="form-control" name="txt_subject"  value="<?= isset($_POST['txt_subject']) ? $_POST['txt_subject'] : '' ?>" data-validation="required">
                         </span> 
                     </div>
                 </div>
@@ -104,7 +122,7 @@ if ($_POST ["submit_bt"] == 'Submit') {
 
                         <label for="inputHelpBlock">ข้อความ <em>*</em></label>
 
-                        <textarea class="form-control" name="txt_message" rows="3" data-validation="required"></textarea>
+                        <textarea class="form-control" name="txt_message" rows="3" data-validation="required"><?= isset($_POST['txt_message']) ? $_POST['txt_message'] : '' ?></textarea>
 
                     </div>
                 </div>
@@ -126,12 +144,12 @@ if ($_POST ["submit_bt"] == 'Submit') {
     </div>
 </div>
 
-          
- 
+
+
 <script src='https://www.google.com/recaptcha/api.js?hl=th'></script>
 
 <script src="http://malsup.github.io/jquery.form.js"></script>
-                                    <script src="http://malsup.github.io/jquery.blockUI.js"></script>
+<script src="http://malsup.github.io/jquery.blockUI.js"></script>
 <link href="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.23/theme-default.min.css"
       rel="stylesheet" type="text/css" />
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.43/jquery.form-validator.min.js"></script>
