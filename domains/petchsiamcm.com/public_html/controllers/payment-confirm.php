@@ -43,8 +43,8 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
         }
 
         $payment_confirm->SetValue('transfer_date', $_POST['transfer_date'] . " " . $_POST['transfer_hr'] . ":" . $_POST['transfer_min'] . ":00");
-        $payment_confirm->SetValue('status', 'รอการชำระเงิน');
-        $payment_confirm->SetValue('status2', 'ยังไม่ได้ส่งของ');
+        $payment_confirm->SetValue('status', 'รอตรวจสอบ');
+      //  $payment_confirm->SetValue('status2', 'ยังไม่ได้ส่งของ');
 
         if ($payment_confirm->Save()) {
 
@@ -151,7 +151,7 @@ if ($_GET['catID'] != '') {
                 <div class="col-md-12"  style="padding-bottom:10px;">
                     <label for="inputHelpBlock">หมายเลขสั่งซื้อ <em>*</em></label>
                     <span>
-                        <input type="text" class="form-control" id="order_id" name="order_id"  data-validation="required,number" value="<?= isset($_POST['order_id']) ? $_POST['order_id'] : ''?>">
+                        <input type="text" class="form-control" id="order_id" name="orders_id"  data-validation="required,number" value="<?= isset($_POST['order_id']) ? $_POST['order_id'] : ''?>">
                     </span> 
                 </div>
             </div>

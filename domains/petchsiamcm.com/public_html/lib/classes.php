@@ -238,7 +238,7 @@ class Customer extends DbTemplate {
 
     function __construct() {
         // Call the parent constructor
-        parent::__construct('customer', DB_DEFAULT);
+        parent::__construct('customers', DB_DEFAULT);
     }
 
 }
@@ -354,5 +354,16 @@ class Payment_confirm_detail extends DbTemplate {
     }
 
 }
+
+class Transfer_money extends DbTemplate {
+
+    function __construct() {
+        // Call the parent constructor
+        parent::__construct('transfer_money', DB_DEFAULT);
+    }
+
+}
+
+
 
 ?>

@@ -44,9 +44,7 @@ function check_refer_user($user_refer_id) {
 $res = '';
 $res_user_refer = '';
 
-if ($customer->CountDataDesc("login_email", "login_email = '" . $username . "'") > 0
-) {
-
+if ($customer->CountDataDesc("login_email", "login_email = '" . $username . "'") > 0) {
 
     $res = 'error';
 }
@@ -86,6 +84,7 @@ if ($res != 'error' && $res_user_refer != 'error') {
 
         $customer->SetValue('updated_at', DATE_TIME);
     }
+     $customer->SetValue('precode', 'pcsc');
 
     if ($customer->Save()) {
 

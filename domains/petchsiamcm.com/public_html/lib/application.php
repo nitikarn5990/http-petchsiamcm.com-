@@ -76,5 +76,7 @@
         $footer = new Footer;
 	$payment_confirm_detail = new Payment_confirm_detail;
         
+        $transfer_money = new Transfer_money;
+        
 	$ProID = $_GET['productID'];
 ?>

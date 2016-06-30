@@ -1,9 +1,6 @@
 
 <?php
 
-function add_money_layer_level(){
-    
-}
 
 if ($_POST ['submit_bt'] == 'บันทึกข้อมูล' || $_POST ['submit_bt'] == 'บันทึกข้อมูล และแก้ไขต่อ') {
 
@@ -51,12 +48,12 @@ if ($_POST ['submit_bt'] == 'บันทึกข้อมูล' || $_POST ['s
 
         if ($redirect) {
 
-            header('location:' . ADDRESS_ADMIN_CONTROL . 'ordered');
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'member_ordered');
 
             die();
         } else {
 
-            header('location:' . ADDRESS_ADMIN_CONTROL . 'ordered&action=edit&id=' . $_GET['id']);
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'member_ordered&action=edit&id=' . $_GET['id']);
 
             die();
         }
@@ -68,27 +65,7 @@ if ($_POST ['submit_bt'] == 'บันทึกข้อมูล' || $_POST ['s
 
 // If Deleting the Page
 
-if ($_GET ['id'] != '' && $_GET ['action'] == 'del') {
 
-    // Get all the form data
-    // /$arrDel = array('id' => $_GET['id']);
-    // $orders->SetValues($arrDel);
-    // Remove the info from the DB
-
-    if ($orders->DeleteMultiID($_GET ['id'])) {
-
-        // Set alert and redirect
-
-        SetAlert('Delete Data Success', 'success');
-
-        header('location:' . ADDRESS_ADMIN_CONTROL . 'ordered');
-
-        die();
-    } else {
-
-        SetAlert('ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
-    }
-}
 
 if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
 
@@ -104,7 +81,13 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
 
         $orders->ResetValues();
     }
+    
+      if ($orders->GetValue('customer_id') != $_SESSION['admin_id']) {
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'member_ordered');
 
+            die();
+      }
+    
     if ($orders->GetValue('customer_id') != 0) {
 
         $customer->SetPrimary((int) $orders->GetValue('customer_id'));
@@ -119,7 +102,11 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
 }
 ?>
 <?php if ($_GET['action'] == "add" || $_GET['action'] == "edit") { ?>
+  <form id="validate" enctype="multipart/form-data"
+                          action="<?php echo ADDRESS_ADMIN_CONTROL ?>member_ordered<?php echo ($orders->GetPrimary() != '') ? '&action=edit&id=' . $orders->GetPrimary() : ''; ?>"
+                          method="post" class="da-form">
     <div class="row-fluid">
+       
         <div class="span12">
     <?php
     // Report errors to the user
@@ -134,9 +121,7 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                             class="icol-<?php echo ($orders->GetPrimary() != '') ? 'application-edit' : 'add' ?>"></i> <?php echo ($orders->GetPrimary() != '') ? '' : '' ?> หมายเลขสั่งซื้อ  <?php echo $orders->getDataDesc('years', 'id=' . $orders->GetPrimary()) . $functions->padLeft($orders->getDataDesc('months', 'id=' . $orders->GetPrimary()), 2, '0') . $functions->padLeft($orders->getDataDesc('id', 'id=' . $orders->GetPrimary()), 6, '0') ?> </span>
                 </div>
                 <div class="da-panel-content da-form-container">
-                    <form id="validate" enctype="multipart/form-data"
-                          action="<?php echo ADDRESS_ADMIN_CONTROL ?>ordered<?php echo ($orders->GetPrimary() != '') ? '&action=edit&id=' . $orders->GetPrimary() : ''; ?>"
-                          method="post" class="da-form">
+                   
     <?php if ($orders->GetPrimary() != ''): ?>
                             <input type="hidden" name="id"
                                    value="<?php echo $orders->GetPrimary() ?>" /> <input
@@ -243,7 +228,13 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
     $total = 0;
 
     while ($row = $db->FetchArray($query)) {
-                                                       
+
+//                                                        $strSQL = "SELECT * FROM products WHERE id = " . $row['product_id'] . "";
+//                                                        $objQuery = mysql_query($strSQL) or die(mysql_error());
+//                                                        $objResult = mysql_fetch_array($objQuery, MYSQL_ASSOC);
+//                                                        $qty = $row['qty'];
+//                                                        $Total = $row['total'];
+//                                                        
         $total = $total + ($row["cost"] * $row["qty"]);
         ?>
 
@@ -286,44 +277,20 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                                     </div>
                                 </div>
 
-                                <div class="da-form-row">
-                                    <label class="da-form-label">สถานะ <span class="required">*</span></label>
-                                    <div class="da-form-item large">
-                                        <ul class="da-form-list">
-    <?php
-    $getStatus = $orders->get_enum_values('status');
-
-    $i = 1;
-
-    foreach ($getStatus as $status) {
-        ?>
-                                                <li><input type="radio"
-                                                           name="status" id="status" value="<?php echo $status ?>"
-                                                <?php echo ($orders->GetPrimary() != "") ? ($orders->GetValue('status') == $status) ? "checked=\"checked\"" : "" : ($i == 1) ? "checked=\"checked\"" : "" ?>
-                                                           class="required" /> <label><?php echo $status ?></label></li>
-                                                           <?php
-                                                           $i ++;
-                                                       }
-                                                       ?>
-                                        </ul>
-                                    </div>
-                                </div>
                             </div>
-                            <div class="btn-row">
-                                <input type="submit" name="submit_bt" value="บันทึกข้อมูล"
-                                       class="btn btn-success" /> 
-                                <input type="submit" name="submit_bt"
-                                       value="บันทึกข้อมูล และแก้ไขต่อ" class="btn btn-primary" /> 
-                                <a
-                                    href="<?php echo ADDRESS_ADMIN_CONTROL ?>ordered"
-                                    class="btn btn-danger">ยกเลิก</a>
-                            </div>
+                           
 
-                    </form>
+                  
                 </div>
+                             
+           
+                </div>
+             
             </div>
         </div>
+        
     </div>
+ </form>
 <?php } else { ?>
 
 
@@ -345,9 +312,7 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                 <div class="da-panel-toolbar">
                     <div class="btn-toolbar">
                         <div class="btn-group">
-                            <a class="btn" onClick="multi_delete()"><img
-                                    src="http://icons.iconarchive.com/icons/awicons/vista-artistic/24/delete-icon.png"
-                                    height="16" width="16"> Delete</a>
+                           
                         </div>
                     </div>
                 </div>
@@ -356,7 +321,7 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                            order="asc" width="1000" style="font-size: 12px">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" id="checkAll"></th>
+                                <th>ลำดับ</th>
                                 <th>หมายเลขสั่งซื้อ</th>    
                                 <th>ชื่อผู้สั่งซื้อ</th>
                                 <th>รหัสสมาชิก</th>
@@ -367,11 +332,11 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                         </thead>
                         <tbody>
     <?php
-    $sql = "SELECT * FROM " . $orders->getTbl() . " ORDER BY id DESC";
+    $sql = "SELECT * FROM " . $orders->getTbl() . " WHERE customer_id = ".$_SESSION['admin_id']." ORDER BY id DESC";
 
     $query = $db->Query($sql);
     $NumRows = $db->NumRows($query);
-
+    $i =1;
     while ($row = $db->FetchArray($query)) {
         $cStatus = "style='background-color: #ffefb4';";
         if ($row['status'] == 'ชำระเงินแล้ว') {
@@ -379,8 +344,7 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
         }
         ?>
                                 <tr class="" <?= $cStatus ?> >
-                                    <td class="center" width="5%"><input type="checkbox"
-                                                                         value="<?php echo $row['id']; ?>" id="chkboxID"></td>
+                                    <td class="center" ><?=$i++?></td>
                                     <td class="center"><?= $orders->getDataDesc('years', 'id=' . $row['id']) . $functions->padLeft($orders->getDataDesc('months', 'id=' . $row['id']), 2, '0') . $functions->padLeft($orders->getDataDesc('id', 'id=' . $row['id']), 6, '0') ?></td>
                                     <td class="center">
         <?php
@@ -407,12 +371,10 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
                                     <td class="center"><?php echo $functions->ShowDateThTime($row['order_date']) ?></td>
 
                                     <td class="center"><a
-                                            href="<?php echo ADDRESS_ADMIN_CONTROL ?>ordered&action=edit&id=<?php echo $row['id'] ?>"
-                                            class="btn btn-primary btn-small">แก้ไข / ดู</a> <a href="#"
-                                            onclick="if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
-                                                                document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>ordered&action=del&id=<?php echo $row['id'] ?>'
-                                                                        }"
-                                            class="btn btn-danger btn-small">ลบ</a></td>
+                                            href="<?php echo ADDRESS_ADMIN_CONTROL ?>member_ordered&action=edit&id=<?php echo $row['id'] ?>"
+                                            class="btn btn-primary btn-small"> ดูรายละเอียด</a> 
+                                   
+                                    </td>
                                 </tr>
                                         <?php } ?>
                         </tbody>
@@ -442,7 +404,7 @@ if ($_GET ['id'] != '' && $_GET ['action'] == 'edit') {
             });
             if (res != '') {
                 if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
-                    document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>ordered&action=del&id=' + res;
+                    document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>member_ordered&action=del&id=' + res;
                 }
             }
 

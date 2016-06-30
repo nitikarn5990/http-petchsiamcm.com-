@@ -77,6 +77,7 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
 
 
                         //order detail
+                        $orders_detail->SetValue('image', $products->getDataDesc("image", "id = " . $_SESSION["strProductID"][$i]));
                         $orders_detail->SetValue('orders_id', $orders_id);
                         $orders_detail->SetValue('product_id', $_SESSION["strProductID"][$i]);
                         $orders_detail->SetValue('product_name', $objResult["product_name"]);
@@ -125,7 +126,7 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                 $tel = $orders->getDataDesc("tel", "id = " . $orders_id);
                 $email = $orders->getDataDesc("email", "id = " . $orders_id);
 
-                $order_no = $orders->getDataDesc("years", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("months", "id = " . $orders_id), 2, '0') . $functions->padLeft($orders_id, 5, '0');
+                $order_no = $orders->getDataDesc("years", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("months", "id = " . $orders_id), 2, '0') . $functions->padLeft($orders_id, 6, '0');
                 $SumTotal = 0;
                 $amt = 0;
                 for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
@@ -263,8 +264,17 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                 $mail->set('X-Priority', '1'); //Priority 1 = High, 3 = Normal, 5 = low
 
                 if (!$mail->Send()) {
-                    echo "<script>alert('ส่งไม่สำเร็จสำเร็จ !!!')</script>";
-                    // echo "<script>$.unblockUI()</script>";
+
+                    $arrDel = array('id' => $orders_id);
+
+                    $orders->SetValues($arrDel);
+
+                    if ($orders->Delete()) {
+                        echo "<script>alert('ส่งไม่สำเร็จสำเร็จ กรุณาลองใหม่อีกครั้ง !!!')</script>";
+                        // echo "<script>$.unblockUI()</script>";
+                        header("location:" . ADDRESS . "shipping");
+                        die();
+                    }
                 } else {
                     //  echo "<script>alert('ส่งสำเร็จ !!!')</script>";
                     //  echo "<script>$.unblockUI()</script>";
@@ -284,8 +294,8 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                             <p><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxnPgoJPHJlY3QgeD0iMSIgeT0iMiIgc3R5bGU9ImZpbGw6I0UwQzZBOTsiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxNCIvPgoJPHBvbHlsaW5lIHN0eWxlPSJmaWxsOiNGRkVDRDc7IiBwb2ludHM9IjUwLDggNTYsMiA1OCwyIDU4LDE2IDU2LDE2IDUwLDggICIvPgoJPHBvbHlnb24gc3R5bGU9ImZpbGw6I0NDQjI5NzsiIHBvaW50cz0iNTAsOCA1MCwxNiA1NiwxNiAgIi8+Cgk8cG9seWxpbmUgc3R5bGU9ImZpbGw6I0ZGRUNENzsiIHBvaW50cz0iOCw4IDIsMiAwLDIgMCwxNiAyLDE2IDgsOCAgIi8+Cgk8cG9seWdvbiBzdHlsZT0iZmlsbDojQ0NCMjk3OyIgcG9pbnRzPSI4LDggOCwxNiAyLDE2ICAiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNGMEQ3Qjg7IiBkPSJNNTQuMjU4LDU2SDMuNzQyQzEuNjc1LDU2LDAsNTQuMzI1LDAsNTIuMjU4VjE2aDU4djM2LjI1OEM1OCw1NC4zMjUsNTYuMzI1LDU2LDU0LjI1OCw1NnoiLz4KCTxjaXJjbGUgc3R5bGU9ImZpbGw6IzcyNTQzQTsiIGN4PSIxNyIgY3k9IjI0IiByPSIzIi8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM3MjU0M0E7IiBjeD0iNDEiIGN5PSIyNCIgcj0iMyIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0NFQjY5RTsiIGQ9Ik0yOSw0M2MtNy4xNjgsMC0xMy01LjgzMi0xMy0xM3YtNmMwLTAuNTUzLDAuNDQ3LTEsMS0xczEsMC40NDcsMSwxdjZjMCw2LjA2NSw0LjkzNSwxMSwxMSwxMSAgIHMxMS00LjkzNSwxMS0xMXYtNmMwLTAuNTUzLDAuNDQ3LTEsMS0xczEsMC40NDcsMSwxdjZDNDIsMzcuMTY4LDM2LjE2OCw0MywyOSw0M3oiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" style="width: 100px;"/></p>
                             <h3 style="text-transform: uppercase;"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjMycHgiIGhlaWdodD0iMzJweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8cGF0aCBkPSJNMjU2LDBDMTE0LjYxNSwwLDAsMTE0LjYxNSwwLDI1NnMxMTQuNjE1LDI1NiwyNTYsMjU2czI1Ni0xMTQuNjE1LDI1Ni0yNTZTMzk3LjM4NSwwLDI1NiwweiBNMjA4LDQxNkwxMDIsMjc4bDQ3LTQ5bDU5LDc1ICAgbDE4NS0xNTFsMjMsMjNMMjA4LDQxNnoiIGZpbGw9IiM5MURDNUEiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" /> 
                                 &nbsp;thank you for your order</h3>
-                            <h5><b>Order number is: <?=$orders->getDataDesc("years","id = ".$orders_id) .$orders->getDataDesc("months","id = ".$orders_id) . $functions->padLeft($orders->getDataDesc("id", "id = " . $orders_id), 6, '0')  ?></b></h5>
-                            <p>เราได้ส่งคำสั่งซื้อไปยัง <?= $orders->getDataDesc("email","id = ". $orders_id)?> ของท่านแล้ว กรุณาเช็คที่กล่องจดหมาย (ถ้าไม่เจอให้ตรวจสอบที่ Junk box)</p>
+                            <h5><b>Order number is: <?= $orders->getDataDesc("years", "id = " . $orders_id) . $orders->getDataDesc("months", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("id", "id = " . $orders_id), 6, '0') ?></b></h5>
+                            <p>ใบสั่งซื้อได้ถูกส่งไปยัง <?= $orders->getDataDesc("email", "id = " . $orders_id) ?> ของท่านแล้ว กรุณาเช็คที่กล่องจดหมาย (ถ้าไม่เจอให้ตรวจสอบที่ Junk box)</p>
                             <p class="hidden"><a href="" class="btn btn-default"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6I0JEQzNDNzsiIGQ9Ik01OCw0MC41SDh2LTI2aDUwVjQwLjV6IE0xMCwzOC41aDQ2di0yMkgxMFYzOC41eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0JEQzNDNzsiIGQ9Ik05LDE2LjVjLTAuNTUyLDAtMS0wLjQ0Ny0xLTF2LTljMC0wLjU1MywwLjQ0OC0xLDEtMXMxLDAuNDQ3LDEsMXY5QzEwLDE2LjA1Myw5LjU1MiwxNi41LDksMTYuNXoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNCREMzQzc7IiBkPSJNOSw0Ny41Yy0wLjU1MiwwLTEtMC40NDctMS0xdi03YzAtMC41NTMsMC40NDgtMSwxLTFzMSwwLjQ0NywxLDF2N0MxMCw0Ny4wNTMsOS41NTIsNDcuNSw5LDQ3LjV6Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM1NTYwODA7IiBjeD0iMTkiIGN5PSI1MS41IiByPSI0Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM1NTYwODA7IiBjeD0iNDMiIGN5PSI1MS41IiByPSI0Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojQkRDM0M3OyIgZD0iTTUyLDQ3LjVIOWMtMC41NTIsMC0xLTAuNDQ3LTEtMXMwLjQ0OC0xLDEtMWg0M2MwLjU1MiwwLDEsMC40NDcsMSwxUzUyLjU1Miw0Ny41LDUyLDQ3LjV6Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM3MUMyODU7IiBjeD0iMzMiIGN5PSIxNS41IiByPSIxMyIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0ZGRkZGRjsiIGQ9Ik0zMywyNC41Yy0wLjU1MiwwLTEtMC40NDctMS0xdi0xNmMwLTAuNTUzLDAuNDQ4LTEsMS0xczEsMC40NDcsMSwxdjE2ICAgQzM0LDI0LjA1MywzMy41NTIsMjQuNSwzMywyNC41eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0ZGRkZGRjsiIGQ9Ik0zMywyNC41Yy0wLjI1NiwwLTAuNTEyLTAuMDk4LTAuNzA3LTAuMjkzYy0wLjM5MS0wLjM5MS0wLjM5MS0xLjAyMywwLTEuNDE0bDctNyAgIGMwLjM5MS0wLjM5MSwxLjAyMy0wLjM5MSwxLjQxNCwwczAuMzkxLDEuMDIzLDAsMS40MTRsLTcsN0MzMy41MTIsMjQuNDAyLDMzLjI1NiwyNC41LDMzLDI0LjV6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojRkZGRkZGOyIgZD0iTTMzLDI0LjVjLTAuMjU2LDAtMC41MTItMC4wOTgtMC43MDctMC4yOTNsLTctN2MtMC4zOTEtMC4zOTEtMC4zOTEtMS4wMjMsMC0xLjQxNCAgIHMxLjAyMy0wLjM5MSwxLjQxNCwwbDcsN2MwLjM5MSwwLjM5MSwwLjM5MSwxLjAyMywwLDEuNDE0QzMzLjUxMiwyNC40MDIsMzMuMjU2LDI0LjUsMzMsMjQuNXoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNCREMzQzc7IiBkPSJNOSw3LjVINGMtMC41NTIsMC0xLTAuNDQ3LTEtMXMwLjQ0OC0xLDEtMWg1YzAuNTUyLDAsMSwwLjQ0NywxLDFTOS41NTIsNy41LDksNy41eiIvPgoJPGNpcmNsZSBzdHlsZT0iZmlsbDojRDg2MjVFOyIgY3g9IjMiIGN5PSI2LjUiIHI9IjMiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" />&nbsp;ซื้อสินค้าเพิ่ม</a></p>
                             <p>
 
@@ -317,157 +327,176 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
             ?>
 
             <div class="col-md-12 well text-center">
-            <?php
-            // $arrData = array();
-            //  $arrData = $functions->replaceQuote($_POST);
-            //$orders->SetValues($arrData);
-            if ($orders->GetPrimary() == '') {
+                <?php
+                // $arrData = array();
+                //  $arrData = $functions->replaceQuote($_POST);
+                //$orders->SetValues($arrData);
+                if ($orders->GetPrimary() == '') {
 
 
-                $orders->SetValue('created_at', DATE_TIME);
+                    $orders->SetValue('created_at', DATE_TIME);
 
 
-                $orders->SetValue('updated_at', DATE_TIME);
-            } else {
+                    $orders->SetValue('updated_at', DATE_TIME);
+                } else {
 
 
-                $orders->SetValue('updated_at', DATE_TIME);
-            }
-            $orders->SetValue('order_date', DATE_TIME);
-            $orders->SetValue('status', 'รอการชำระเงิน');
+                    $orders->SetValue('updated_at', DATE_TIME);
+                }
+                $orders->SetValue('order_date', DATE_TIME);
+                $orders->SetValue('status', 'รอการชำระเงิน');
 
-            if ($_SESSION['admin_id'] != '') {
-                $orders->SetValue('customer_id', $_SESSION['admin_id']);
-            } else {
-                $orders->SetValue('customer_id', "0");
-            }
-
-
-            $year_bill = substr(intval(date('Y')) + intval(543), 2);
-            $orders->SetValue('years', $year_bill);
-            $orders->SetValue('months', date('m'));
-
-            if ($orders->Save()) {
-                $orders_id = $orders->GetValue('id');
-                // echo $orders_id;
-                // die();
-                //send_email_order($orders_id);
-
-                if ($orders_id != '') {
-                    //  $orders_id = $orders->GetValue('id');
-
-                    for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
-
-                        if ($_SESSION["strProductID"][$i] != "") {
+                if ($_SESSION['admin_id'] != '') {
+                    $orders->SetValue('customer_id', $_SESSION['admin_id']);
+                } else {
+                    $orders->SetValue('customer_id', "0");
+                }
 
 
-                            $strSQL = "SELECT * FROM products WHERE id = " . $_SESSION["strProductID"][$i] . "";
-                            $objQuery = mysql_query($strSQL) or die(mysql_error());
-                            $objResult = mysql_fetch_array($objQuery, MYSQL_ASSOC);
+                $year_bill = substr(intval(date('Y')) + intval(543), 2);
+                $orders->SetValue('years', $year_bill);
+                $orders->SetValue('months', date('m'));
 
-                            if ($_SESSION['group'] != '' && $_SESSION['group'] == 'member') {
-                                $products_cost = $objResult['product_member_cost'];
-                            } else {
-                                $products_cost = $objResult['product_cost'];
-                            }
-
-                            $qty = $_SESSION["strQty"][$i];
-                            $Total = $qty * $products_cost;
-                            $SumTotal = $SumTotal + $Total;
-                            $_SESSION["Total"] = $SumTotal;
+                //get customer 
+                $customer->SetPrimary((int) $_SESSION['admin_id']);
+                
+                if ($customer->GetInfo()) {
+                    
+                    $orders->SetValue('first_name', $customer->GetValue('customer_name'));
+                    $orders->SetValue('last_name', $customer->GetValue('customer_lastname'));
+                    $orders->SetValue('address', $customer->GetValue('customer_address'));
+                    $orders->SetValue('province', $customer->GetValue('customer_province'));
+                    $orders->SetValue('zipcode', $customer->GetValue('customer_zipcode'));
+                    $orders->SetValue('tel', $customer->GetValue('customer_tel'));
+                    $orders->SetValue('email', $customer->GetValue('customer_email'));
+                }
 
 
 
-                            //order detail
-                            $orders_detail->SetValue('orders_id', $orders_id);
-                            $orders_detail->SetValue('product_id', $_SESSION["strProductID"][$i]);
-                            $orders_detail->SetValue('product_name', $objResult["product_name"]);
 
-                            $orders_detail->SetValue('qty', $qty);
-                            $orders_detail->SetValue('cost', $products_cost);
-                            // $orders_detail->SetValue('total', $Total);
-                            if ($orders_detail->save()) {
-                                
+
+                if ($orders->Save()) {
+                    $orders_id = $orders->GetValue('id');
+                    // echo $orders_id;
+                    // die();
+                    //send_email_order($orders_id);
+
+                    if ($orders_id != '') {
+                        //  $orders_id = $orders->GetValue('id');
+
+                        for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
+
+                            if ($_SESSION["strProductID"][$i] != "") {
+
+
+                                $strSQL = "SELECT * FROM products WHERE id = " . $_SESSION["strProductID"][$i] . "";
+                                $objQuery = mysql_query($strSQL) or die(mysql_error());
+                                $objResult = mysql_fetch_array($objQuery, MYSQL_ASSOC);
+
+                                if ($_SESSION['group'] != '' && $_SESSION['group'] == 'member') {
+                                    $products_cost = $objResult['product_member_cost'];
+                                } else {
+                                    $products_cost = $objResult['product_cost'];
+                                }
+
+                                $qty = $_SESSION["strQty"][$i];
+                                $Total = $qty * $products_cost;
+                                $SumTotal = $SumTotal + $Total;
+                                $_SESSION["Total"] = $SumTotal;
+
+
+
+                                //order detail
+                                $orders_detail->SetValue('image', $products->getDataDesc("image", "id = " . $_SESSION["strProductID"][$i]));
+                                $orders_detail->SetValue('orders_id', $orders_id);
+                                $orders_detail->SetValue('product_id', $_SESSION["strProductID"][$i]);
+                                $orders_detail->SetValue('product_name', $objResult["product_name"]);
+
+                                $orders_detail->SetValue('qty', $qty);
+                                $orders_detail->SetValue('cost', $products_cost);
+                                // $orders_detail->SetValue('total', $Total);
+                                if ($orders_detail->save()) {
+                                    
+                                }
                             }
                         }
-                    }
 
 
 
-                    //gmail:petchsiamcm2016@gmail.com
-                    //pass: pcsc2016
-                    $acc_email = 'petchsiamcm2016@gmail.com';
-                    $acc_pass = 'pcsc2016';
+                        //gmail:petchsiamcm2016@gmail.com
+                        //pass: pcsc2016
+                        $acc_email = 'petchsiamcm2016@gmail.com';
+                        $acc_pass = 'pcsc2016';
 
-                    $mail = new PHPMailer();
-                    $mail->IsHTML(true);
-                    $mail->IsSMTP();
-                    $mail->SMTPAuth = true; // enable SMTP authentication
-                    $mail->SMTPSecure = "ssl"; // sets the prefix to the servier
-                    $mail->Host = "smtp.gmail.com"; // sets GMAIL as the SMTP server
-                    // $mail->Host = "mail.petchsiamcm.com"; // sets GMAIL as the SMTP server   
+                        $mail = new PHPMailer();
+                        $mail->IsHTML(true);
+                        $mail->IsSMTP();
+                        $mail->SMTPAuth = true; // enable SMTP authentication
+                        $mail->SMTPSecure = "ssl"; // sets the prefix to the servier
+                        $mail->Host = "smtp.gmail.com"; // sets GMAIL as the SMTP server
+                        // $mail->Host = "mail.petchsiamcm.com"; // sets GMAIL as the SMTP server   
 
-                    $mail->Port = 465; // set the SMTP port for the GMAIL server
+                        $mail->Port = 465; // set the SMTP port for the GMAIL server
 
-                    $mail->Username = $acc_email; // บัญชีสำหรับส่งเมล์ Gmail
-                    $mail->Password = $acc_pass; //  รหัส GMAIL
-                    $mail->FromName = 'บริษัท เพชรสยามการเกษตร จำกัด';  // ชื่อผู้ส่ง
-                    $mail->Subject = "รายละเอียดการสั่งซื้อสินค้า"; //ชื่อเรื่อง
-                    $mail->AddCC('nitikarnboom2030@gmail.com', ADDRESS); //สำเนาส่งถึง เมล์เจ้าของร้าน
-                    $mail->AddReplyTo('nitikarnboom2030@gmail.com', ADDRESS); //ตอบกลับถึง เมล์เจ้าของร้าน
+                        $mail->Username = $acc_email; // บัญชีสำหรับส่งเมล์ Gmail
+                        $mail->Password = $acc_pass; //  รหัส GMAIL
+                        $mail->FromName = 'บริษัท เพชรสยามการเกษตร จำกัด';  // ชื่อผู้ส่ง
+                        $mail->Subject = "รายละเอียดการสั่งซื้อสินค้า"; //ชื่อเรื่อง
+                        $mail->AddCC('nitikarnboom2030@gmail.com', ADDRESS); //สำเนาส่งถึง เมล์เจ้าของร้าน
+                        $mail->AddReplyTo('nitikarnboom2030@gmail.com', ADDRESS); //ตอบกลับถึง เมล์เจ้าของร้าน
 
-                    $mail->CharSet = "utf-8";
-
-
-                    $logo = ADDRESS . 'images/logo.png';
-                    $body = "";
-                    $detail = "";
-                    $name = $orders->getDataDesc("first_name", "id = " . $orders_id) . ' ' . $orders->getDataDesc("last_name", "id = " . $orders_id);
-                    $address = $orders->getDataDesc("address", "id = " . $orders_id);
-                    $tel = $orders->getDataDesc("tel", "id = " . $orders_id);
-                    $email = $orders->getDataDesc("email", "id = " . $orders_id);
-
-                    $order_no = $orders->getDataDesc("years", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("months", "id = " . $orders_id), 2, '0') . $functions->padLeft($orders_id, 5, '0');
-                    $SumTotal = 0;
-                    $amt = 0;
-                    for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
+                        $mail->CharSet = "utf-8";
 
 
-                        if ($_SESSION["strProductID"][$i] != "") {
+                        $logo = ADDRESS . 'images/logo.png';
+                        $body = "";
+                        $detail = "";
+                        $name = $orders->getDataDesc("first_name", "id = " . $orders_id) . ' ' . $orders->getDataDesc("last_name", "id = " . $orders_id);
+                        $address = $orders->getDataDesc("address", "id = " . $orders_id);
+                        $tel = $orders->getDataDesc("tel", "id = " . $orders_id);
+                        $email = $orders->getDataDesc("email", "id = " . $orders_id);
 
-                            $strSQL = "SELECT * FROM products WHERE id = " . $_SESSION["strProductID"][$i] . "";
-                            $objQuery = mysql_query($strSQL) or die(mysql_error());
-                            $objResult = mysql_fetch_array($objQuery, MYSQL_ASSOC);
-
-                            if ($_SESSION['group'] != '' && $_SESSION['group'] == 'member') {
-                                $products_cost = $objResult['product_member_cost'];
-                            } else {
-                                $products_cost = $objResult['product_cost'];
-                            }
-
-                            $qty = $_SESSION["strQty"][$i];
-                            $Total = $qty * $products_cost;
-                            $SumTotal = $SumTotal + $Total;
-                            $amt = $amt + $Total;
-                            $_SESSION["Total"] = $SumTotal;
+                        $order_no = $orders->getDataDesc("years", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("months", "id = " . $orders_id), 2, '0') . $functions->padLeft($orders_id, 6, '0');
+                        $SumTotal = 0;
+                        $amt = 0;
+                        for ($i = 0; $i <= (int) $_SESSION["intLine"]; $i++) {
 
 
+                            if ($_SESSION["strProductID"][$i] != "") {
+
+                                $strSQL = "SELECT * FROM products WHERE id = " . $_SESSION["strProductID"][$i] . "";
+                                $objQuery = mysql_query($strSQL) or die(mysql_error());
+                                $objResult = mysql_fetch_array($objQuery, MYSQL_ASSOC);
+
+                                if ($_SESSION['group'] != '' && $_SESSION['group'] == 'member') {
+                                    $products_cost = $objResult['product_member_cost'];
+                                } else {
+                                    $products_cost = $objResult['product_cost'];
+                                }
+
+                                $qty = $_SESSION["strQty"][$i];
+                                $Total = $qty * $products_cost;
+                                $SumTotal = $SumTotal + $Total;
+                                $amt = $amt + $Total;
+                                $_SESSION["Total"] = $SumTotal;
 
 
-                            $detail .= "<tr>
+
+
+                                $detail .= "<tr>
                                 <td class='pro-id' style='text-align: center;font-size: 14px;'><img src=" . ADDRESS . 'files/gallery/' . $objResult["image"] . " style='width:70px;' /></td>
                                 <td class='pro-desc' style='text-align: center;font-size: 14px;'>" . $objResult["product_name"] . "</td>
                                 <td class='pro-price' style='text-align: center;font-size: 14px;'>" . $functions->formatcurrency($products_cost) . "</td>
                                 <td class='quantity' style='text-align: center;font-size: 14px;'>" . $qty . "</td>
                                 <td class='sumprice' style='text-align: center;font-size: 14px;'>" . $functions->formatcurrency(($Total)) . "</td>
                             </tr>";
+                            }
                         }
-                    }
 
 
-                    $link_confirm_payment = "<a style='font-size=20px;' href=" . ADDRESS . payment - confirm . " target='_blank'>แจ้งชำระเงิน คลิ๊ก</a>";
+                        $link_confirm_payment = "<a style='font-size=20px;' href=" . ADDRESS . payment - confirm . " target='_blank'>แจ้งชำระเงิน คลิ๊ก</a>";
 
-                    $my_body = "<table align='center' border='0' cellpadding='0' cellspacing='5' width='100%'>
+                        $my_body = "<table align='center' border='0' cellpadding='0' cellspacing='5' width='100%'>
 	<tbody>
 		<tr>
 			<td> 
@@ -559,20 +588,28 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
 </table>";
 
 
-                    $mail->Body = $my_body;
-                    $mail->AddAddress($email); // to Address
+                        $mail->Body = $my_body;
+                        $mail->AddAddress($email); // to Address
 
-                    $mail->set('X-Priority', '1'); //Priority 1 = High, 3 = Normal, 5 = low
+                        $mail->set('X-Priority', '1'); //Priority 1 = High, 3 = Normal, 5 = low
 
-                    if (!$mail->Send()) {
-                        echo "<script>alert('ส่งไม่สำเร็จสำเร็จ !!!')</script>";
-                        // echo "<script>$.unblockUI()</script>";
-                    } else {
-                        //  echo "<script>alert('ส่งสำเร็จ !!!')</script>";
-                        //  echo "<script>$.unblockUI()</script>";
-                        // header("location:" . ADDRESS . "success/" . $orders_id);
-                        //    header("location:" . ADDRESS . "product");
-                        ?>
+                        if (!$mail->Send()) {
+                            $arrDel = array('id' => $orders_id);
+
+                            $orders->SetValues($arrDel);
+
+                            if ($orders->Delete()) {
+                                echo "<script>alert('ส่งไม่สำเร็จสำเร็จ กรุณาลองใหม่อีกครั้ง !!!')</script>";
+                                // echo "<script>$.unblockUI()</script>";
+                                header("location:" . ADDRESS . "shipping");
+                                die();
+                            }
+                        } else {
+                            //  echo "<script>alert('ส่งสำเร็จ !!!')</script>";
+                            //  echo "<script>$.unblockUI()</script>";
+                            // header("location:" . ADDRESS . "success/" . $orders_id);
+                            //    header("location:" . ADDRESS . "product");
+                            ?>
 
                             <?php
 //clear cart
@@ -585,31 +622,31 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                                 <p><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxnPgoJPHJlY3QgeD0iMSIgeT0iMiIgc3R5bGU9ImZpbGw6I0UwQzZBOTsiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxNCIvPgoJPHBvbHlsaW5lIHN0eWxlPSJmaWxsOiNGRkVDRDc7IiBwb2ludHM9IjUwLDggNTYsMiA1OCwyIDU4LDE2IDU2LDE2IDUwLDggICIvPgoJPHBvbHlnb24gc3R5bGU9ImZpbGw6I0NDQjI5NzsiIHBvaW50cz0iNTAsOCA1MCwxNiA1NiwxNiAgIi8+Cgk8cG9seWxpbmUgc3R5bGU9ImZpbGw6I0ZGRUNENzsiIHBvaW50cz0iOCw4IDIsMiAwLDIgMCwxNiAyLDE2IDgsOCAgIi8+Cgk8cG9seWdvbiBzdHlsZT0iZmlsbDojQ0NCMjk3OyIgcG9pbnRzPSI4LDggOCwxNiAyLDE2ICAiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNGMEQ3Qjg7IiBkPSJNNTQuMjU4LDU2SDMuNzQyQzEuNjc1LDU2LDAsNTQuMzI1LDAsNTIuMjU4VjE2aDU4djM2LjI1OEM1OCw1NC4zMjUsNTYuMzI1LDU2LDU0LjI1OCw1NnoiLz4KCTxjaXJjbGUgc3R5bGU9ImZpbGw6IzcyNTQzQTsiIGN4PSIxNyIgY3k9IjI0IiByPSIzIi8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM3MjU0M0E7IiBjeD0iNDEiIGN5PSIyNCIgcj0iMyIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0NFQjY5RTsiIGQ9Ik0yOSw0M2MtNy4xNjgsMC0xMy01LjgzMi0xMy0xM3YtNmMwLTAuNTUzLDAuNDQ3LTEsMS0xczEsMC40NDcsMSwxdjZjMCw2LjA2NSw0LjkzNSwxMSwxMSwxMSAgIHMxMS00LjkzNSwxMS0xMXYtNmMwLTAuNTUzLDAuNDQ3LTEsMS0xczEsMC40NDcsMSwxdjZDNDIsMzcuMTY4LDM2LjE2OCw0MywyOSw0M3oiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" style="width: 100px;"/></p>
                                 <h3 style="text-transform: uppercase;"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjMycHgiIGhlaWdodD0iMzJweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8cGF0aCBkPSJNMjU2LDBDMTE0LjYxNSwwLDAsMTE0LjYxNSwwLDI1NnMxMTQuNjE1LDI1NiwyNTYsMjU2czI1Ni0xMTQuNjE1LDI1Ni0yNTZTMzk3LjM4NSwwLDI1NiwweiBNMjA4LDQxNkwxMDIsMjc4bDQ3LTQ5bDU5LDc1ICAgbDE4NS0xNTFsMjMsMjNMMjA4LDQxNnoiIGZpbGw9IiM5MURDNUEiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" /> 
                                     &nbsp;thank you for your order</h3>
-                                <h5><b>Order number is: <?=$orders->getDataDesc("years","id = ".$orders_id) .$orders->getDataDesc("months","id = ".$orders_id) . $functions->padLeft($orders->getDataDesc("id", "id = " . $orders_id), 6, '0')  ?></b></h5>
-                                <p>เราได้ส่งคำสั่งซื้อไปยัง <?=$customer->getDataDesc("customer_email","id = ". $_SESSION["admin_id"])?> ของท่านแล้ว กรุณาเช็คที่กล่องจดหมาย (ถ้าไม่เจอให้ตรวจสอบที่ Junk box)</p>
+                                <h5><b>Order number is: <?= $orders->getDataDesc("years", "id = " . $orders_id) . $orders->getDataDesc("months", "id = " . $orders_id) . $functions->padLeft($orders->getDataDesc("id", "id = " . $orders_id), 6, '0') ?></b></h5>
+                                <p>ใบสั่งซื้อได้ถูกส่งไปยัง <?= $customer->getDataDesc("customer_email", "id = " . $_SESSION["admin_id"]) ?> ของท่านแล้ว กรุณาเช็คที่กล่องจดหมาย (ถ้าไม่เจอให้ตรวจสอบที่ Junk box)</p>
                                 <p class="hidden"><a href="" class="btn btn-default"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6I0JEQzNDNzsiIGQ9Ik01OCw0MC41SDh2LTI2aDUwVjQwLjV6IE0xMCwzOC41aDQ2di0yMkgxMFYzOC41eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0JEQzNDNzsiIGQ9Ik05LDE2LjVjLTAuNTUyLDAtMS0wLjQ0Ny0xLTF2LTljMC0wLjU1MywwLjQ0OC0xLDEtMXMxLDAuNDQ3LDEsMXY5QzEwLDE2LjA1Myw5LjU1MiwxNi41LDksMTYuNXoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNCREMzQzc7IiBkPSJNOSw0Ny41Yy0wLjU1MiwwLTEtMC40NDctMS0xdi03YzAtMC41NTMsMC40NDgtMSwxLTFzMSwwLjQ0NywxLDF2N0MxMCw0Ny4wNTMsOS41NTIsNDcuNSw5LDQ3LjV6Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM1NTYwODA7IiBjeD0iMTkiIGN5PSI1MS41IiByPSI0Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM1NTYwODA7IiBjeD0iNDMiIGN5PSI1MS41IiByPSI0Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojQkRDM0M3OyIgZD0iTTUyLDQ3LjVIOWMtMC41NTIsMC0xLTAuNDQ3LTEtMXMwLjQ0OC0xLDEtMWg0M2MwLjU1MiwwLDEsMC40NDcsMSwxUzUyLjU1Miw0Ny41LDUyLDQ3LjV6Ii8+Cgk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM3MUMyODU7IiBjeD0iMzMiIGN5PSIxNS41IiByPSIxMyIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0ZGRkZGRjsiIGQ9Ik0zMywyNC41Yy0wLjU1MiwwLTEtMC40NDctMS0xdi0xNmMwLTAuNTUzLDAuNDQ4LTEsMS0xczEsMC40NDcsMSwxdjE2ICAgQzM0LDI0LjA1MywzMy41NTIsMjQuNSwzMywyNC41eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0ZGRkZGRjsiIGQ9Ik0zMywyNC41Yy0wLjI1NiwwLTAuNTEyLTAuMDk4LTAuNzA3LTAuMjkzYy0wLjM5MS0wLjM5MS0wLjM5MS0xLjAyMywwLTEuNDE0bDctNyAgIGMwLjM5MS0wLjM5MSwxLjAyMy0wLjM5MSwxLjQxNCwwczAuMzkxLDEuMDIzLDAsMS40MTRsLTcsN0MzMy41MTIsMjQuNDAyLDMzLjI1NiwyNC41LDMzLDI0LjV6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojRkZGRkZGOyIgZD0iTTMzLDI0LjVjLTAuMjU2LDAtMC41MTItMC4wOTgtMC43MDctMC4yOTNsLTctN2MtMC4zOTEtMC4zOTEtMC4zOTEtMS4wMjMsMC0xLjQxNCAgIHMxLjAyMy0wLjM5MSwxLjQxNCwwbDcsN2MwLjM5MSwwLjM5MSwwLjM5MSwxLjAyMywwLDEuNDE0QzMzLjUxMiwyNC40MDIsMzMuMjU2LDI0LjUsMzMsMjQuNXoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNCREMzQzc7IiBkPSJNOSw3LjVINGMtMC41NTIsMC0xLTAuNDQ3LTEtMXMwLjQ0OC0xLDEtMWg1YzAuNTUyLDAsMSwwLjQ0NywxLDFTOS41NTIsNy41LDksNy41eiIvPgoJPGNpcmNsZSBzdHlsZT0iZmlsbDojRDg2MjVFOyIgY3g9IjMiIGN5PSI2LjUiIHI9IjMiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" />&nbsp;ซื้อสินค้าเพิ่ม</a></p>
                                 <p>
 
-                                </p>
+                                </p> 
                             </div>
 
 
 
-                        <?php
+                            <?php
+                        }
                     }
-                }
 
 
-                unset($_SESSION["intLine"]);
-                unset($_SESSION["strQty"]);
-                unset($_SESSION["strProductID"]);
-                unset($_SESSION["count_cart"]);
+                    unset($_SESSION["intLine"]);
+                    unset($_SESSION["strQty"]);
+                    unset($_SESSION["strProductID"]);
+                    unset($_SESSION["count_cart"]);
 
 //clear cart
-                ?>
+                    ?>
 
                 </div>
-                <?php } ?>
+            <?php } ?>
 
 
         <?php } else { ?>
@@ -617,15 +654,15 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
             <div class="well col-md-12">
                 <div class="col-md-12">
 
-            <?php
-            // Report errors to the user
+                    <?php
+                    // Report errors to the user
 
 
-            Alert(GetAlert('error'));
+                    Alert(GetAlert('error'));
 
 
-            Alert(GetAlert('success'), 'success');
-            ?>
+                    Alert(GetAlert('success'), 'success');
+                    ?>
 
 
                 </div>

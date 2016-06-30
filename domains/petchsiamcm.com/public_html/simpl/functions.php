@@ -84,6 +84,56 @@ if (!function_exists('Alert')){
 		}
 	}
 }
+if (!function_exists('Alert2')){
+	function Alert2($alerts, $type=''){
+		// Decide what class to display
+		$class = ($type == '')?'Error':$type;
+		
+		//Display all errors to user
+		if ( is_array($alerts) && count($alerts) > 0){
+			while ( list($key,$data) = each($alerts) ){
+				//echo '<div class="form' . ucfirst($class) . '" id="form' . ucfirst($class) . '"><p>' . $data . '</p></div>'. "\n";
+				if(ucfirst($class) == "Success"){
+					echo '<div class="da-message success" style="margin-bottom:10px">' . $data. '</div>';
+				}else{
+					echo '<div class="da-message error" style="margin-bottom:10px">' . $data. '</div>';
+				}
+			}
+		}else if ( is_string($alerts) ){
+			//echo '<div class="form' . ucfirst($class) . '" id="form' . ucfirst($class) . '"><p>' . $alerts . '</p></div>'. "\n";
+			if(ucfirst($class) == "Success"){
+				echo '<div class="alert alert-success" style="margin-bottom:10px">' . $data. '</div>';
+			}else{
+				echo '<div class="alert alert-danger" style="margin-bottom:10px">' . $data. '</div>';
+			}
+		}
+	}
+	
+	function AlertFront2($alerts, $type=''){
+		// Decide what class to display
+		$class = ($type == '')?'Error':$type;
+		
+		//Display all errors to user
+		if ( is_array($alerts) && count($alerts) > 0){
+			while ( list($key,$data) = each($alerts) ){
+				//echo '<div class="form' . ucfirst($class) . '" id="form' . ucfirst($class) . '"><p>' . $data . '</p></div>'. "\n";
+				if(ucfirst($class) == "Success"){
+                                    
+					echo '<div class="alert alert-success">' . $data. '</div>';
+				}else{
+					echo '<div class="alert alert-danger">' . $data. '</div>';
+				}
+			}
+		}else if ( is_string($alerts) ){
+			//echo '<div class="form' . ucfirst($class) . '" id="form' . ucfirst($class) . '"><p>' . $alerts . '</p></div>'. "\n";
+			if(ucfirst($class) == "Success"){
+				echo '<div class="alert alert-success">' . $data. '</div>';
+			}else{
+				echo '<div class="alert alert-danger">' . $data. '</div>';
+			}
+		}
+	}
+}
 
 /**
  * Set a string as an alert

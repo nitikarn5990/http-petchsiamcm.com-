@@ -52,7 +52,7 @@ if ($_POST['submit_bt'] == 'เข้าสู่ระบบ' || $_POST['submit
                     header('location:' . ADDRESS . '?success=true');
                     die();
                 } else {
-                    SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
+                   // SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
                     header('location:' . ADDRESS . '?error=true');
 
                     die();
@@ -60,7 +60,7 @@ if ($_POST['submit_bt'] == 'เข้าสู่ระบบ' || $_POST['submit
             } else {
 
 
-                SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
+              //  SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
                 header('location:' . ADDRESS . '?error=true');
 
                 die();
@@ -130,7 +130,7 @@ if ($_POST['submit_bt'] == 'เข้าสู่ระบบ' || $_POST['submit
                 header('location:' . ADDRESS_ADMIN_CONTROL . "slides");
                 die();
             } else {
-                SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
+               // SetAlert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง');
                 // echo "<script> $(document).ready(function() { alert('ชื่อผู้ใช้ กับรหัสผ่านไม่ตรงกัน กรุณาลองใหม่อีกครั้ง') }); </script>";
                 header('location:' . ADDRESS_ADMIN);
                 die();
@@ -138,7 +138,7 @@ if ($_POST['submit_bt'] == 'เข้าสู่ระบบ' || $_POST['submit
         } else {
 
 
-            SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
+           // SetAlert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง');
             //  echo "<script>$(document).ready(function() { alert('ไม่มีชื่อผู้ใช้นี้ กรุณาลองใหม่อีกครั้ง') });</script>";
             header('location:' . ADDRESS_ADMIN);
             die();

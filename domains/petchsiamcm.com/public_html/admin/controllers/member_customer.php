@@ -80,6 +80,7 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล' || $_POST['sub
 
     $customer->SetValue('precode', 'pcsc');
     $customer->SetValue('customer_refer_id', $customer_id);
+     $customer->SetValue('status', 'ใช้งาน');
     
 
     if ($customer->Save()) {
@@ -150,12 +151,12 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล' || $_POST['sub
 
         if ($redirect) {
 
-            header('location:' . ADDRESS_ADMIN_CONTROL . 'customer');
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'member_customer');
 
             die();
         } else {
 
-            header('location:' . ADDRESS_ADMIN_CONTROL . 'customer&action=edit&id=' . $customer->GetPrimary());
+            header('location:' . ADDRESS_ADMIN_CONTROL . 'member_customer&action=edit&id=' . $customer->GetPrimary());
 
             die();
         }
@@ -166,41 +167,14 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล' || $_POST['sub
 }
 
 
-if ($_GET['id'] != '' && $_GET['action'] == 'del') {
 
 
-    // Get all the form data
-    ///$arrDel = array('id' => $_GET['id']);
-    //$customer->SetValues($arrDel);
-    // Remove the info from the DB
-
-
-    if ($customer->DeleteMultiID($_GET['id'])) {
-
-
-        // Set alert and redirect
-
-
-        SetAlert('Delete Data Success', 'success');
-
-
-        header('location:' . ADDRESS_ADMIN_CONTROL . 'customer');
-
-
-        die();
-    } else {
-
-
-        SetAlert('ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
-    }
-}
-
-
-if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
+if ($_SESSION['admin_id'] != '') {
 
     // For Update
 
-    $customer->SetPrimary((int) $_GET['id']);
+    
+    $customer->SetPrimary((int) $_SESSION['admin_id']);
 
     // Try to get the information
 
@@ -214,7 +188,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
     }
 }
 ?>
-<?php if ($_GET['action'] == "add" || $_GET['action'] == "edit") { ?>
+
 
     <div class="row-fluid">
         <div class="span12">
@@ -225,9 +199,9 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
             Alert2(GetAlert('success'), 'success');
             ?>
             <div class="da-panel collapsible">
-                <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-<?php echo ($customer->GetPrimary() != '') ? 'application-edit' : 'add' ?>"></i> <?php echo ($customer->GetPrimary() != '') ? 'แก้ไข' : '' ?> สมาชิก </span> </div>
+                <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-<?php echo ($customer->GetPrimary() != '') ? 'application-edit' : 'add' ?>"></i> <?php echo ($customer->GetPrimary() != '') ? 'แก้ไข' : '' ?> ข้อมูลส่วนตัว </span> </div>
                 <div class="da-panel-content da-form-container">
-                    <form id="validate" enctype="multipart/form-data" action="<?php echo ADDRESS_ADMIN_CONTROL ?>customer<?php echo ($customer->GetPrimary() != '') ? '&action=edit&id=' . $customer->GetPrimary() : ''; ?>" method="post" class="da-form">
+                    <form id="validate" enctype="multipart/form-data" action="<?php echo ADDRESS_ADMIN_CONTROL ?>member_customer<?php echo ($customer->GetPrimary() != '') ? '&action=edit&id=' . $customer->GetPrimary() : ''; ?>" method="post" class="da-form">
                         <?php if ($customer->GetPrimary() != ''): ?>
                             <input type="hidden" name="id" value="<?php echo $customer->GetValue('id') ?>" />
                             <input type="hidden" name="image_idcard" value="<?php echo $customer->GetValue('image_idcard') ?>" />
@@ -240,12 +214,12 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                 <div class="da-form-row">
                                     <label class="da-form-label">รหัส <span class="required">*</span></label>
                                     <div class="da-form-item large">
-                                        <input type="text" name="codeid" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('precode') . $customer->GetValue('id') : ''; ?>" class="span12 required" readonly="readonly"/>
+                                        <input type="text" name="codeid" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('precode') . $customer->GetValue('id') : ''; ?>" class="span12 required" disabled=""/>
                                     </div>
                                 </div>
                             </fieldset>
                             <div class="da-form-row">
-                                <label class="da-form-label">ชื่อสมาชิก <span class="required">*</span></label>
+                                <label class="da-form-label">ชื่อ <span class="required">*</span></label>
                                 <div class="da-form-item large ">
                                     <input type="text" name="customer_name" id="customer_name" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('customer_name') : ''; ?>" class="span12 required" />
                                 </div>
@@ -262,10 +236,10 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                             <div class="da-form-row">
                                 <label class="da-form-label">เบอร์โทร<span class="required">*</span></label>
                                 <div class="da-form-item large">
-                                    <input type="text" name="customer_tel" id="customer_tel" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('customer_tel') : ''; ?>" class="span12 required" />
+                                    <input type="text" name="customer_tel" id="customer_tel" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('customer_tel') : ''; ?>" class="span12 number required" />
                                 </div>
                             </div>
-                            <div class="da-form-row">
+                              <div class="da-form-row">
                                 <label class="da-form-label">Email<span class="required">*</span></label>
                                 <div class="da-form-item large">
                                     <input type="text" name="customer_email" id="customer_email" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('customer_email') : ''; ?>" class="span12 required email" />
@@ -291,7 +265,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                     <input type="text" name="customer_zipcode" id="" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('customer_zipcode') : ''; ?>" class="span12 required"/>
                                 </div>
                             </div>
-                            <fieldset>
+                             <fieldset style="display: none;">
                                 <legend><b>ไฟล์สำเนาบัตรประชาชน</b></legend>
                                 <div class="da-form-row">
                                     <label class="da-form-label">ไฟล์ที่อัพโหลด <span class="required">*</span></label>
@@ -308,7 +282,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                     </div>
                                 </div>
                             </fieldset>
-                            <fieldset>
+                            <fieldset style="display: none;">
                                 <legend><b>ไฟล์สำเนาหน้าสมุดบัญชี</b></legend>
                                 <div class="da-form-row">
                                     <label class="da-form-label">ไฟล์ที่อัพโหลด <span class="required">*</span></label>
@@ -325,7 +299,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                     </div>
                                 </div>
                             </fieldset>
-                            <fieldset>
+                             <fieldset style="">
                                 <legend><b>หน้าสมุดบัญชี</b></legend>
                                 <div class="da-form-row">
                                     <label class="da-form-label">ชื่อธนาคาร <span class="required">*</span></label>
@@ -378,40 +352,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                 </div>
 
                             </fieldset>
-                            <fieldset>
-                                <legend><b>การเข้าสู่ระบบ</b></legend>
-                                <div class="da-form-row">
-                                    <label class="da-form-label">เข้าสู่ระบบล่าสุด<span class="required">*</span></label>
-                                    <div class="da-form-item large">
-                                        <input type="text" name="last_login" id="last_login" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('last_login') : ''; ?>" class="span12 required" readonly="readonly"/>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <fieldset>
-                                <legend><b>สถานะ</b></legend>
-                                <div class="da-form-row">
-                                    <label class="da-form-label">สถานะ <span class="required">*</span></label>
-                                    <div class="da-form-item large">
-                                        <ul class="da-form-list">
-                                            <?php
-                                            $getStatus = $customer->get_enum_values('status');
-
-                                            $i = 1;
-
-                                            foreach ($getStatus as $status) {
-                                                ?>
-                                                <li>
-                                                    <input type="radio" name="status" id="status" value="<?php echo $status ?>" <?php echo ($customer->GetPrimary() != "") ? ($customer->GetValue('status') == $status) ? "checked=\"checked\"" : "" : ($i == 1) ? "checked=\"checked\"" : "" ?> class="required"/>
-                                                    <label><?php echo $status ?></label>
-                                                </li>
-                                                <?php
-                                                $i++;
-                                            }
-                                            ?>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </fieldset>
+                        
                             <fieldset>
                                 <legend><b>Refer (ผู้แนะนำ)</b></legend>
                                 <div class="da-form-row">
@@ -427,13 +368,14 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                         }
                                         ?>
                                         <input type="text"  name="customer_refer_id" id="customer_refer_id" value="<?php echo $customer_refer_id ?>" class="span12" />
+                                         <label class="help-block">ถ้าไม่มีให้เป็นค่าว่าง</label>
                                     </div>
-                                     <label class="help-block">ถ้าไม่มีให้เป็นค่าว่าง</label>
                                 </div>
                                 <div class="da-form-row">
                                     <label class="da-form-label">ชื่อผู้แนะนำ <span class="required"></span></label>
                                     <div class="da-form-item large">
                                         <input type="text" disabled="" name="customer_refer_name" id="customer_refer_name" value="<?php echo $customer_refer_name; ?>" class="span12" />
+                                       
                                     </div>
                                 </div>
 
@@ -443,7 +385,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
                                 <div class="da-form-row">
                                     <label class="da-form-label">User name <span class="required">*</span></label>
                                     <div class="da-form-item large">
-                                        <input type="text" name="login_email" id="login_email" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('login_email') : ''; ?>" class="span12 required" />
+                                        <input type="text" name="login_email"  readonly="" id="login_email" value="<?php echo ($customer->GetPrimary() != '') ? $customer->GetValue('login_email') : ''; ?>" class="span12 required" />
                                     </div>
                                 </div>
                                 <div class="da-form-row">
@@ -464,96 +406,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
             </div>
         </div> 
     </div>
-<?php } else { ?>
 
-    <div class="row-fluid">
-        <div class="span12">
-            <?php
-            // Report errors to the user
-
-
-            Alert2(GetAlert('error'));
-
-
-            Alert2(GetAlert('success'), 'success');
-            ?>
-            <div class="da-panel collapsible">
-                <div class="da-panel-header"> <span class="da-panel-title"> <i class="icol-grid"></i> สมาชิก ทั้งหมด </span> </div>
-                <div class="da-panel-toolbar">
-                    <div class="btn-toolbar">
-                        <div class="btn-group">
-                            <a class="btn" onClick="multi_delete()"><img src="http://icons.iconarchive.com/icons/awicons/vista-artistic/24/delete-icon.png" height="16" width="16"> Delete</a> 
-                        </div>
-                    </div>
-                </div>
-                <div class="da-panel-content da-table-container">
-                    <table id="da-ex-datatable-sort" class="da-table" sort="3" order="asc" width="1000">
-                        <thead>
-                            <tr style="font-size: 12px">
-                                <th><input type="checkbox" id="checkAll"></th>
-                                <th>รหัสสมาชิก</th>
-                                <th>ชื่อ</th>
-                                <th>สถานะ</th>
-                                <th>เข้าสู่ระบบล่าสุด</th>
-                                <th>แก้ไขล่าสุด</th>
-                                <th>ตัวเลือก</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $sql = "SELECT * FROM " . $customer->getTbl();
-
-                            $query = $db->Query($sql);
-
-                            while ($row = $db->FetchArray($query)) {
-                                ?>
-                                <tr>
-                                    <td class="center" width="5%" style="font-size: 12px"><input type="checkbox" value="<?php echo $row['id']; ?>" id="chkboxID"></td>
-                                    <td class="center" style="font-size: 12px"><?php echo $row['precode'] . $row['id']; ?></td>
-                                    <td style="font-size: 12px"><?php echo $row['customer_name'] . " " . $row['customer_lastname'] ?></td>
-                                    <td class="center" style="font-size: 12px"><i class="icol-<?php echo ($row['status'] == 'ใช้งาน') ? 'accept' : 'cross' ?>" title="<?php echo $row['status'] ?>"></i></td>
-                                    <td style="font-size: 12px"><?php echo $row['last_login']; ?></td>
-                                    <td style="font-size: 12px"><?php echo $row['updated_at']; ?></td>
-                                    <td class="center" style="font-size: 12px"><a href="<?php echo ADDRESS_ADMIN_CONTROL ?>customer&action=edit&id=<?php echo $row['id'] ?>" class="btn btn-primary btn-small">แก้ไข / ดู</a> <a href="#" onclick="if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
-                                                document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>customer&action=del&id=<?php echo $row['id'] ?>'
-                                                        }" class="btn btn-danger btn-small">ลบ</a></td>
-                                </tr>
-                            <?php } ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-
-        $("#checkAll").click(function (e) {
-            $('input:checkbox').prop('checked', this.checked);
-        });
-
-        function multi_delete() {
-
-            var msg_id = "";
-            var res = "";
-
-            $('input:checkbox[id^="chkboxID"]:checked').each(function () {
-
-
-                msg_id += ',' + $(this).val();
-                res = msg_id.substring(1);
-
-
-            });
-            if (res != '') {
-                if (confirm('คุณต้องการลบข้อมูลนี้หรือใม่?') == true) {
-                    document.location.href = '<?php echo ADDRESS_ADMIN_CONTROL ?>customer&action=del&id=' + res;
-                }
-            }
-
-        }
-
-    </script>
-<?php } ?>
 
 <script language="javascript">
 // Start XmlHttp Object
@@ -627,7 +480,7 @@ if ($_GET['id'] != '' && $_GET['action'] == 'edit') {
 
     $(document).ready(function () {
 
-        $('input:radio[name="products_file_name_cover"][value="<?php echo $customer->getDataDesc("products_file_name_cover", "id = '" . $_GET['id'] . "'"); ?>"]').prop('checked', true);
+        $('input:radio[name="products_file_name_cover"][value="<?php echo $customer->getDataDesc("products_file_name_cover", "id = '" . $_SESSION['admin_id'] . "'"); ?>"]').prop('checked', true);
 
     });
 

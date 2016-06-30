@@ -390,6 +390,7 @@ if ($_GET['product_files_id'] != '' && $_GET['action'] == 'edit') {
                             $sql = "SELECT * FROM " . $products->getTbl();
 
                             $query = $db->Query($sql);
+                           
 
                             while ($row = $db->FetchArray($query)) {
                                 ?>

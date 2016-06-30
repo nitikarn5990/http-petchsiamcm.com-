@@ -103,6 +103,20 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                     </div>
                     <div class="col-md-6"  style="padding-bottom:10px;">
 
+                        <label for="inputHelpBlock">จังหวัด <em>*</em></label>
+                        <span>
+                            <input type="text" class="form-control" name="customer_province"  data-validation="required">
+                        </span> 
+                    </div>
+                    <div class="col-md-6"  style="padding-bottom:10px;">
+
+                        <label for="inputHelpBlock">รหัสไปรษณีย์ <em>*</em></label>
+                        <span>
+                            <input type="text" class="form-control" name="customer_zipcode"  data-validation="required">
+                        </span> 
+                    </div>
+                    <div class="col-md-6"  style="padding-bottom:10px;">
+
                         <label for="inputHelpBlock">เบอร์โทร <em>*</em></label>
                         <span>
                             <input type="text" class="form-control" name="customer_tel"  data-validation="number,required">
@@ -263,7 +277,6 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
 <div id="bb22"></div>
 
 <script>
-
 // pre-submit callback 
     function showRequest(formData, jqForm, options) {
 
@@ -306,18 +319,19 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
                 timeout: 5000,
             });
             $('#myForm2')[0].reset();
+          //  window.location.href = "";
         }
         grecaptcha.reset();
 
         $.unblockUI();
     }
-    
+
     var status = '';
     function check_username_duplicate() {
         var txt_username = $('#username').val();
         //alert(txt_username);
         if (txt_username != '') {
-            
+
             $.ajax({
                 type: 'POST',
                 url: '<?= ADDRESS ?>ajax/ajax_check_username_duplicate.php',
@@ -336,11 +350,11 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
             });
         }
     }
-    
+
     $('#check_user_refer').click(function () {
-    
+
         var txt_user_refer_id = $('#txt_user_refer').val();
-        
+
         if (txt_user_refer_id != '') {
             //หาชื่อจริง จาก id ผู้แนะนำ
             $.ajax({
@@ -413,36 +427,42 @@ if ($_POST['submit_bt'] == 'บันทึกข้อมูล') {
         },
         onSuccess: function ($form) {
 
-//console.log($('#g-recaptcha-response').val());
+          //  console.log($form.attr('id'));
 //          
 //if ($('#g-recaptcha-response').val() != '') {
+            if ($form.attr('id') == 'myForm2') {
+                $.ajax({
+                    type: 'POST',
+                    url: '<?= ADDRESS ?>ajax/ajax_check_captcha.php',
+                    dataType: 'json',
+                    data: {
+                        recaptcha: $('#g-recaptcha-response').val()
+                    },
+                    success: function (data) {
+                        if (data.captcha == 'error') {
+                            noty({
+                                text: 'Captcha Error',
+                                type: 'warning',
+                                theme: 'relax', // or 'relax'
+                                timeout: 3000,
+                            });
+                        } else {
+                            $('#myForm2').ajaxSubmit(options);
+                        }
 
-            $.ajax({
-                type: 'POST',
-                url: '<?= ADDRESS ?>ajax/ajax_check_captcha.php',
-                dataType: 'json',
-                data: {
-                    recaptcha: $('#g-recaptcha-response').val()
-                },
-                success: function (data) {
-                    if (data.captcha == 'error') {
-                        noty({
-                            text: 'Captcha Error',
-                            type: 'warning',
-                            theme: 'relax', // or 'relax'
-                            timeout: 3000,
-                        });
-                    } else {
-                        $('#myForm2').ajaxSubmit(options);
+                        // console.log(data.captcha);
+                        // $('#myForm2').ajaxSubmit(options);
                     }
+                });
+                return false; 
+            }else{
+                 return true;
+            }
 
-                    // console.log(data.captcha);
-                    // $('#myForm2').ajaxSubmit(options);
-                }
-            });
+
             // }
             //  $('#myForm2').ajaxSubmit(options);
-            return false; // Will stop the submission of the form
+            // Will stop the submission of the form
         },
     });
 </script>
